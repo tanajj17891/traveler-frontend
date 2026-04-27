@@ -89,14 +89,14 @@ const Signup = () => {
               placeholder="Enter Email"
               className="signup-input"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)} //onChange keeps a track of what the user is typing 
             />
             <input
               type="password"
               placeholder="Password"
               className="signup-input"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)} //e.target.value stores that input 
             />
             <input
               type="password"
