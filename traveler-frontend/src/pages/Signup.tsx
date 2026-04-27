@@ -1,7 +1,9 @@
 import "./Signup.css";
+import {Link} from 'react-router-dom';
+
 
 const Signup = () => {
-  console.log('hello')
+  
   return (
     <div className="signup-page">
       <div className="logo-wrapper">
@@ -24,10 +26,13 @@ const Signup = () => {
           <h2 className="signup-subtitle">Traveler</h2>
 </div>  
 <div className="signup-bottom-header">
-          <p className="signup-text">
-            Got an account? <br />
-            <span className="signup-link"> Login here!</span>
-          </p>
+          <p>
+            Already have an account? {" "}
+            <Link to ="/Signup" className="Login-link">
+            
+            Login here!
+            </Link>
+            </p> 
           </div>
         </div>
 
