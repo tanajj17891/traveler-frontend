@@ -1,0 +1,164 @@
+.signin-page {
+  background: #ffffff;
+  font-family: Arial, Helvetica, sans-serif;
+    display: grid;
+    gap: 200px;
+}
+
+/* LOGO */
+.signin-logo {
+  top: 30px;
+  left: 40px;
+  width: 130px;
+}
+
+/* LEFT TEXT */
+.signin-left {
+  top: 50%;
+  left: 140px;
+  display: grid;
+  gap:35px
+}
+
+.signin-title {
+  color: #000;
+font-style: normal;
+font-weight: 600;
+font-size: 50px;
+line-height: 75px;
+}
+
+
+.signin-subtitle {
+font-style: normal;
+font-weight: 500;
+font-size: 35px;
+line-height: 52px;
+  color: #000;
+}
+
+.signup-link{
+  font-style: normal;
+  color: #4a4ad8;
+  font-size: 35px;
+}
+
+
+
+.signin-text {
+font-style: normal;
+font-weight: 400;
+font-size: 16px;
+line-height: 24px;
+  color: #666;
+}
+
+
+.Login-link {
+  color: #4a4ad8;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* RIGHT FORM */
+.signin-right {
+  top: 80%;
+  right: 700px;
+  width: 340px;
+  display:grid;
+  gap: 30px;
+}
+
+.form-title {
+  font-style: normal;
+font-weight: 500;
+font-size: 30px;
+line-height: 45px;
+  color: #111;
+}
+
+
+
+
+
+.signin-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 500px;
+  padding-right: 500px;
+}
+
+/* INPUTS */
+.signin-input {
+  width: 100%;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-left: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #ebe7f8;
+  font-size: 15px;
+  outline: none;
+
+}
+
+.signin-input::placeholder {
+  color: #8e88c7;
+}
+
+/* BUTTON */
+.signin-button {
+  width: 100%;
+  padding-top: 15px;
+    padding-bottom: 15px;
+
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #6d5dfc, #8a2be2);
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+
+box-shadow: 0px 4px 61px rgba(77, 71, 195, 0.4);
+}
+
+.signin-form-inputs {
+    display: grid;
+    gap: 20px;
+}
+
+
+
+
+.logo-wrapper {
+  top: 30px;
+  left: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 150px;
+  height: auto;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logo-title {
+  font-size: 50px;
+  font-weight: 700;
+  color: #4d56b8; /* match your purple */
+}
+
+.logo-subtitle {
+  font-size: 12px;
+  color: #6b6f8a;
+  margin-top: 2px;
+}
