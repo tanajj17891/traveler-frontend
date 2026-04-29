@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AuthLayout from "../components/authLayout";
+import api from "../api/axios";
+import { AxiosError } from "axios";
 
 const Verify = () => {
   const [code, setCode] = useState(""); //code (The State Variable): Holds the current value of the state. On the first render, it matches the initial value you passed to useState().
@@ -20,24 +22,15 @@ const Verify = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5001/auth/confirm-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: email, code }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "Verification failed.");
-      } else {
-        setSuccess("Email verified! Redirecting to login...");
-        setTimeout(() => navigate("/login"), 2000);
-      }
+      
+      await api.post("/auth/verify", { email });
+      setSuccess("Account verified! Redirecting...");
+      setTimeout(() => navigate("/login", { state: { email } }), 1500);
     } catch (err) {
-      setError("Could not connect to server.");
-      console.log(err); 
+      const error = err as AxiosError<{ message: string }>; //tells TS that it knows its an axios error, string tells TS what the response data from backend is
+      setError(error.response?.data?.message || "Signup failed.");
     }
+  
   };
 
   return (

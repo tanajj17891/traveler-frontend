@@ -1,85 +1,88 @@
-import "./Signup.css";
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import AuthLayout from "../components/authLayout";
 import api from "../api/axios";
 import { AxiosError } from "axios";
 
-const Signup = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const ResetPassword = () => {
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email;
 
-  const handleSignup = async () => {
+  const handleResetPassword = async () => {
     setError("");
     setSuccess("");
 
-    if (!email || !password || !confirmPassword) {
+    if (!code || !newPassword || !confirmPassword) {
       setError("All fields are required.");
       return;
     }
-    if (password !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
     try {
-      await api.post("/auth/create-user", { email, password });
-      setSuccess("Account created! Redirecting...");
-      setTimeout(() => navigate("/verify", { state: { email } }), 1500);
+      await api.post("/auth/reset-password", { email, code, newPassword });
+      setSuccess("Password reset successfully!");
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
       const error = err as AxiosError<{ message: string }>; //tells TS that it knows its an axios error, string tells TS what the response data from backend is
-      setError(error.response?.data?.message || "Signup failed.");
+      setError(error.response?.data?.message || "Password reset failed.");
     }
   };
+  
+  
 
   return (
     <AuthLayout
-      title="Sign Up To"
-      subtitle="Traveler"
-      bottomText="Already have an account?"
+      title="Reset Your"
+      subtitle="Password"
+      bottomText="Remembered it?"
       bottomLinkText="Login here!"
       bottomLinkTo="/login"
-      formTitle="Sign Up"
+      formTitle="Reset Password"
     >
       <div className="signup-form-inputs">
         {error && <p style={{ color: "red", margin: "0 0 8px" }}>{error}</p>}
-        {success && (
-          <p style={{ color: "green", margin: "0 0 8px" }}>{success}</p>
-        )}
+        {success && <p style={{ color: "green", margin: "0 0 8px" }}>{success}</p>}
 
         <input
-          type="email"
-          placeholder="Enter Email"
+          type="text"
+          placeholder="Enter verification code"
           className="signup-input"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="New Password"
           className="signup-input"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
         />
         <input
           type="password"
-          placeholder="Confirm Password"
+          placeholder="Confirm New Password"
           className="signup-input"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
       </div>
       <div className="signup-form-regist-button">
-        <button className="signup-button" onClick={handleSignup}>
-          Register
+        <button className="signup-button" onClick={handleResetPassword}>
+          Reset Password
         </button>
       </div>
     </AuthLayout>
   );
 };
+  
 
-export default Signup;
+export default ResetPassword;
