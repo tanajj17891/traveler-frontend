@@ -30,7 +30,7 @@ const Login = () => {
       //   body: JSON.stringify({ email, password }),
       // });
 
-      const { data } = await api.post("auth/login", { email, password });
+      const { data } = await api.post("/auth/login", { email, password });
 
       console.log(data);
 

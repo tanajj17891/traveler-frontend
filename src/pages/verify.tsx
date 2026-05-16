@@ -23,7 +23,7 @@ const Verify = () => {
 
     try {
       
-      await api.post("/auth/verify", { email });
+      await api.post("/auth/confirm-user", { username: email, code});
       setSuccess("Account verified! Redirecting...");
       setTimeout(() => navigate("/login", { state: { email } }), 1500);
     } catch (err) {
