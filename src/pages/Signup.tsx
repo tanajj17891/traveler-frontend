@@ -4,35 +4,37 @@ import { useNavigate } from "react-router-dom";
 import AuthLayout from "../components/authLayout";
 import api from "../api/axios";
 import { AxiosError } from "axios";
+import toast from "react-hot-toast";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error] = useState("");
+  const [success] = useState("");
   const navigate = useNavigate();
 
   const handleSignup = async () => {
-    setError("");
-    setSuccess("");
-
     if (!email || !password || !confirmPassword) {
-      setError("All fields are required.");
+      toast.error("All fields are required.");
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
 
     try {
       await api.post("/auth/create-user", { email, password });
-      setSuccess("Account created! Redirecting...");
+      toast.success("Account created! Redirecting...");
       setTimeout(() => navigate("/verify", { state: { email } }), 1500);
     } catch (err) {
-      const error = err as AxiosError<{ message: string }>; //tells TS that it knows its an axios error, string tells TS what the response data from backend is
-      setError(error.response?.data?.message || "Signup failed.");
+      const error = err as AxiosError<{
+        error: { description: string; data: string[] };
+      }>;
+      const data = error.response?.data?.error;
+      const message = data?.data?.[0] ?? data?.description ?? "Signup failed";
+      toast.error(message);
     }
   };
 

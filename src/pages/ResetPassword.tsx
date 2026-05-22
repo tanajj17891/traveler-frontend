@@ -4,27 +4,26 @@ import { useNavigate, useLocation } from "react-router-dom";
 import AuthLayout from "../components/authLayout";
 import api from "../api/axios";
 import { AxiosError } from "axios";
+import toast from "react-hot-toast";
 
 const ResetPassword = () => {
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
 
   const handleResetPassword = async () => {
-    setError("");
-    setSuccess("");
 
     if (!code || !newPassword || !confirmPassword) {
-      setError("All fields are required.");
+      toast.error("All fields are required.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
 
@@ -33,8 +32,12 @@ const ResetPassword = () => {
       setSuccess("Password reset successfully!");
       setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
-      const error = err as AxiosError<{ message: string }>; //tells TS that it knows its an axios error, string tells TS what the response data from backend is
-      setError(error.response?.data?.message || "Password reset failed.");
+      const error = err as AxiosError<{
+        error: { description: string; data: string[] };
+      }>;
+      const data = error.response?.data?.error;
+      const message = data?.data?.[0] ?? data?.description ?? "Reset password failed";
+      toast.error(message);
     }
   };
   

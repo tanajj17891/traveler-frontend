@@ -71,3 +71,10 @@ export default defineConfig([
   },
 ])
 ```
+### Frontend Deployment
+- S3 bucket littletraveler.net has static website hosting enabled
+- CloudFront distribution sits in front of S3 and handles HTTPS
+- TLS certificate created via ACM covers littletraveler.net and *.littletraveler.net
+- Route 53 A and AAAA records point littletraveler.net to the CloudFront distribution
+- CloudFront default root object is set to index.html
+- npm run build , Re-upload the contents of the dist folder to the littletraveler.net S3 bucket

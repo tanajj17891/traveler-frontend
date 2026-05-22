@@ -1,10 +1,11 @@
+import toast from "react-hot-toast";
 import "./Login.css";
 import { useState } from "react";
 // import { useNavigate } from "react-router-dom";
 import AuthLayout from "../components/authLayout";
-import {Link} from "react-router-dom"; 
+import { Link } from "react-router-dom";
 import api from "../api/axios";
-
+import { AxiosError } from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -19,30 +20,20 @@ const Login = () => {
     setSuccess("");
 
     if (!email || !password) {
-      setError("All fields are required.");
+      toast.error("All fields are required.");
       return;
     }
 
     try {
-      // const response = await fetch("http://localhost:5001/auth/login", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ email, password }),
-      // });
-
       const { data } = await api.post("/auth/login", { email, password });
+      toast.success("Logged in!");
 
       console.log(data);
-
-      // if (!response.ok) {
-      //   setError(data.message || "Login failed.");
-      // } else {
-      //   setSuccess("Logged in! Redirecting...");
-      //   setTimeout(() => navigate("/home"), 1500); // change /home to wherever you want
-      // }
     } catch (err) {
-      // setError("Could not connect to server.");
-      console.log(err);
+      const error = err as AxiosError<{ error: { description: string, data: string[] } }>;
+      const data = error.response?.data?.error;
+      const message = data?.data?.[0] ?? data?.description ?? "Login failed";
+      toast.error(message);
     }
   };
 

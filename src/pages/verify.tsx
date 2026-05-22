@@ -3,34 +3,34 @@ import { useNavigate, useLocation } from "react-router-dom";
 import AuthLayout from "../components/authLayout";
 import api from "../api/axios";
 import { AxiosError } from "axios";
+import toast from "react-hot-toast";
 
 const Verify = () => {
   const [code, setCode] = useState(""); //code (The State Variable): Holds the current value of the state. On the first render, it matches the initial value you passed to useState().
-  const [error, setError] = useState(""); //setCode (The Setter Function): A function that lets you update the state to a new value and triggers a re-render of the component
-  const [success, setSuccess] = useState("");
+  const [error] = useState(""); //setCode (The Setter Function): A function that lets you update the state to a new value and triggers a re-render of the component
+  const [success] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
 
   const handleVerify = async () => {
-    setError("");
-    setSuccess("");
-
     if (!code) {
-      setError("Please enter the verification code.");
+      toast.error("Please enter the verification code.");
       return;
     }
 
     try {
-      
-      await api.post("/auth/confirm-user", { username: email, code});
-      setSuccess("Account verified! Redirecting...");
+      await api.post("/auth/confirm-user", { username: email, code });
+      toast.success("Account verified! Redirecting...");
       setTimeout(() => navigate("/login", { state: { email } }), 1500);
     } catch (err) {
-      const error = err as AxiosError<{ message: string }>; //tells TS that it knows its an axios error, string tells TS what the response data from backend is
-      setError(error.response?.data?.message || "Signup failed.");
+      const error = err as AxiosError<{
+        error: { description: string; data: string[] };
+      }>;
+      const data = error.response?.data?.error;
+      const message = data?.data?.[0] ?? data?.description ?? "Signup failed";
+      toast.error(message);
     }
-  
   };
 
   return (
@@ -44,7 +44,9 @@ const Verify = () => {
     >
       <div className="signup-form-inputs">
         {error && <p style={{ color: "red", margin: "0 0 8px" }}>{error}</p>}
-        {success && <p style={{ color: "green", margin: "0 0 8px" }}>{success}</p>}
+        {success && (
+          <p style={{ color: "green", margin: "0 0 8px" }}>{success}</p>
+        )}
 
         <input
           type="text"
