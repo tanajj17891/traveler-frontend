@@ -78,3 +78,13 @@ export default defineConfig([
 - Route 53 A and AAAA records point littletraveler.net to the CloudFront distribution
 - CloudFront default root object is set to index.html
 - npm run build , Re-upload the contents of the dist folder to the littletraveler.net S3 bucket
+
+### REDPLOYING frontend
+- npm run build
+- Go to AWS S3 → littletraveler.net bucket
+- Select all existing files and folders → click Delete
+- Click Upload → drag in all contents of the dist folder (files + assets folder)
+- Click Upload
+- Go to CloudFront → littletraveler distribution
+- Click Invalidations tab → Create invalidation
+- Enter /* as the path → click Create invalidation

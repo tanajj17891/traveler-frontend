@@ -1,9 +1,8 @@
 import toast from "react-hot-toast";
 import "./Login.css";
 import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import AuthLayout from "../components/authLayout";
-import { Link } from "react-router-dom";
 import api from "../api/axios";
 import { AxiosError } from "axios";
 
@@ -13,7 +12,7 @@ const Login = () => {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     setError("");
@@ -26,11 +25,18 @@ const Login = () => {
 
     try {
       const { data } = await api.post("/auth/login", { email, password });
+
+      localStorage.setItem("accessToken", data.accessToken);
+
       toast.success("Logged in!");
+
+      navigate("/profile");
 
       console.log(data);
     } catch (err) {
-      const error = err as AxiosError<{ error: { description: string, data: string[] } }>;
+      const error = err as AxiosError<{
+        error: { description: string; data: string[] };
+      }>;
       const data = error.response?.data?.error;
       const message = data?.data?.[0] ?? data?.description ?? "Login failed";
       toast.error(message);
