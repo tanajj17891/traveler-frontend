@@ -88,3 +88,8 @@ export default defineConfig([
 - Go to CloudFront → littletraveler distribution
 - Click Invalidations tab → Create invalidation
 - Enter /* as the path → click Create invalidation
+
+### How are we fixing the email?
+- we save ID token that contains email
+- pre propulate the form
+- read only 

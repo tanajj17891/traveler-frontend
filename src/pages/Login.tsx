@@ -27,6 +27,7 @@ const Login = () => {
       const { data } = await api.post("/auth/login", { email, password });
 
       localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("idToken", data.idToken);
 
       toast.success("Logged in!");
 

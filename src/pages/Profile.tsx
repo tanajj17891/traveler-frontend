@@ -3,12 +3,13 @@ import { jwtDecode } from "jwt-decode";
 import { createProfile, type CreateProfileRequest } from "../api/profileAPI";
 import "./Profile.css";
 
-type CognitoPayload = { // jwt issued by cognito
+type CognitoPayload = {
+  // jwt issued by cognito
   sub: string;
   email?: string;
 };
 
-const travelStyles = [ 
+const travelStyles = [
   { label: "Beach & sun", value: "BEACH_AND_SUN" },
   { label: "Adventure", value: "ADVENTURE" },
   { label: "City breaks", value: "CITY_BREAKS" },
@@ -27,10 +28,21 @@ const preferences = [
   { label: "Budget conscious", value: "BUDGET_CONSCIOUS" },
 ];
 
-export default function Profile() { 
-  const [form, setForm] = useState<CreateProfileRequest>({ // stores the form data
-    cognitoSub: "",
-    email: "",
+export default function Profile() {
+  
+  const idToken = localStorage.getItem("idToken"); // used to get real user info like email
+
+  const decodedIdToken = idToken
+    ? jwtDecode<CognitoPayload>(idToken) // decodes the id token so we can get email and cognito sub
+    : null;
+
+  const [form, setForm] = useState<CreateProfileRequest>({
+    // stores the form data
+
+    // pre-fills cognitoSub and email from the logged-in user's id token
+    cognitoSub: decodedIdToken?.sub ?? "",
+    email: decodedIdToken?.email ?? "",
+
     firstName: "",
     lastName: "",
     gender: "",
@@ -41,7 +53,8 @@ export default function Profile() {
     preferences: [],
   });
 
-  const handleChange = ( // handles changes to user inputs
+  const handleChange = (
+    // handles changes to user inputs
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     setForm({
@@ -50,16 +63,18 @@ export default function Profile() {
     });
   };
 
-  const toggleTravelStyle = (value: string) => { // handles travel style toggles
-    setForm((prev) => ({
-      ...prev,
+  const toggleTravelStyle = (value: string) => {
+    // handles travel style toggles
+    setForm((prev) => ({ 
+      ...prev, // Take every property from pre and copy it into the new object.
       travelStyle: prev.travelStyle?.includes(value)
         ? prev.travelStyle.filter((item) => item !== value)
-        : [...(prev.travelStyle || []), value],
+        : [...(prev.travelStyle || []), value], // keep everything the same and checks if style is already selected
     }));
   };
 
-  const togglePreference = (value: string) => { // handles travel style preferences
+  const togglePreference = (value: string) => {
+    // handles travel style preferences
     setForm((prev) => ({
       ...prev,
       preferences: prev.preferences?.includes(value)
@@ -70,22 +85,23 @@ export default function Profile() {
 
   const handleSubmit = async () => {
     try {
-      const token = localStorage.getItem("accessToken"); // gets cognito token when they hit save 
+      const currentAccessToken = localStorage.getItem("accessToken"); // gets access token when they hit save
+      const currentIdToken = localStorage.getItem("idToken"); // gets id token when they hit save
 
-      if (!token) {
-        alert("No access token found. Please log in again.");
+      if (!currentAccessToken || !currentIdToken) {
+        alert("No token found. Please log in again.");
         return;
       }
 
-      const decoded = jwtDecode<CognitoPayload>(token);  // JWT decode is the process of converting a Base64Url-encoded JSON Web Token (JWT) string back into a human-readable JSON object.
+      const decodedCurrentIdToken = jwtDecode<CognitoPayload>(currentIdToken); // JWT decode converts token string into readable user data
 
       const profileData: CreateProfileRequest = {
         ...form,
-        cognitoSub: decoded.sub,
-        email: form.email || decoded.email || "", // extracts sub and email
+        cognitoSub: decodedCurrentIdToken.sub, // always use cognitoSub from token
+        email: decodedCurrentIdToken.email ?? form.email, // always use email from token first
       };
 
-      await createProfile(profileData, token); // creates request body matching my backend, then it goes to profileapi.tsx which does post /prpfile
+      await createProfile(profileData, currentAccessToken); // sends POST /profile with Authorization Bearer accessToken
 
       alert("Profile created successfully!");
     } catch (error) {
@@ -122,7 +138,8 @@ export default function Profile() {
               name="email"
               placeholder="Email"
               value={form.email}
-              onChange={handleChange}
+              readOnly
+              className="readonly-input"
             />
 
             <input
@@ -186,9 +203,7 @@ export default function Profile() {
                 key={pref.value}
                 type="button"
                 className={
-                  form.preferences?.includes(pref.value)
-                    ? "chip active"
-                    : "chip"
+                  form.preferences?.includes(pref.value) ? "chip active" : "chip"
                 }
                 onClick={() => togglePreference(pref.value)}
               >
