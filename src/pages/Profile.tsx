@@ -55,7 +55,7 @@ export default function Profile() {
 
   const handleChange = (
     // handles changes to user inputs
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> 
   ) => {
     setForm({
       ...form,

@@ -93,3 +93,12 @@ export default defineConfig([
 - we save ID token that contains email
 - pre propulate the form
 - read only 
+### What is Rem?
+- 1rem stands for "root em" and equals the font-size of the root element (the <html> tag).
+- If you explicitly change the font-size of your <html> element in your CSS stylesheet, 1rem
+
+### What is content, padding, brorder and margin?
+- Content: The text, images, or child items.
+- Padding: The internal breathing room surrounding the content.
+- Border: The line wrapping around the padding and content.
+- Margin: The empty space outside the border used to separate the element from other elements.
