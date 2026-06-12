@@ -26,3 +26,13 @@ export const createProfile = async (
 
   return response.data;
 };
+
+export const getProfile = async (cognitoSub: string, token: string) => {
+  const response = await api.get(`/profile/${cognitoSub}`, { //gets access token from backend 
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};
