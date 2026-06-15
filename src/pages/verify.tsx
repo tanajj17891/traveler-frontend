@@ -9,6 +9,7 @@ const Verify = () => {
   const [code, setCode] = useState(""); //code (The State Variable): Holds the current value of the state. On the first render, it matches the initial value you passed to useState().
   const [error] = useState(""); //setCode (The Setter Function): A function that lets you update the state to a new value and triggers a re-render of the component
   const [success] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
@@ -18,6 +19,7 @@ const Verify = () => {
       toast.error("Please enter the verification code.");
       return;
     }
+    setLoading(true);
 
     try {
       await api.post("/auth/confirm-user", { username: email, code });
@@ -30,6 +32,8 @@ const Verify = () => {
       const data = error.response?.data?.error;
       const message = data?.data?.[0] ?? data?.description ?? "Signup failed";
       toast.error(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,8 +61,19 @@ const Verify = () => {
         />
       </div>
       <div className="signup-form-regist-button">
-        <button className="signup-button" onClick={handleVerify}>
-          Verify
+        <button
+          className="signup-button"
+          onClick={handleVerify}
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <span className="spinner"></span>
+              Verifying Account...
+            </>
+          ) : (
+            "Verify"
+          )}
         </button>
       </div>
     </AuthLayout>

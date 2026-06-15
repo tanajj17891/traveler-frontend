@@ -12,6 +12,7 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error] = useState("");
   const [success] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = async () => {
@@ -19,6 +20,7 @@ const Signup = () => {
       toast.error("All fields are required.");
       return;
     }
+    setLoading(true);
     if (password !== confirmPassword) {
       toast.error("Passwords do not match.");
       return;
@@ -35,6 +37,8 @@ const Signup = () => {
       const data = error.response?.data?.error;
       const message = data?.data?.[0] ?? data?.description ?? "Signup failed";
       toast.error(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,8 +80,19 @@ const Signup = () => {
         />
       </div>
       <div className="signup-form-regist-button">
-        <button className="signup-button" onClick={handleSignup}>
-          Register
+        <button
+          className="signup-button"
+          onClick={handleSignup}
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <span className="spinner"></span>
+              Creating Account...
+            </>
+          ) : (
+            "Sign Up"
+          )}
         </button>
       </div>
     </AuthLayout>

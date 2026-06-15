@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { createProfile, type CreateProfileRequest } from "../api/profileAPI";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import "./Profile.css";
 
 type CognitoPayload = {
@@ -29,7 +31,7 @@ const preferences = [
 ];
 
 export default function Profile() {
-  
+   const navigate = useNavigate();
   const idToken = localStorage.getItem("idToken"); // used to get real user info like email
 
   const decodedIdToken = idToken
@@ -55,7 +57,7 @@ export default function Profile() {
 
   const handleChange = (
     // handles changes to user inputs
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> 
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setForm({
       ...form,
@@ -65,7 +67,7 @@ export default function Profile() {
 
   const toggleTravelStyle = (value: string) => {
     // handles travel style toggles
-    setForm((prev) => ({ 
+    setForm((prev) => ({
       ...prev, // Take every property from pre and copy it into the new object.
       travelStyle: prev.travelStyle?.includes(value)
         ? prev.travelStyle.filter((item) => item !== value)
@@ -103,10 +105,11 @@ export default function Profile() {
 
       await createProfile(profileData, currentAccessToken); // sends POST /profile with Authorization Bearer accessToken
 
-      alert("Profile created successfully!");
+      toast.success("Profile created successfully!");
+      navigate("/home");
     } catch (error) {
       console.error(error);
-      alert("Failed to create profile");
+      alert("Profile already exists.");
     }
   };
 
@@ -114,7 +117,9 @@ export default function Profile() {
     <main className="profile-page">
       <div className="profile-container">
         <h1>Set up your profile</h1>
-        <p>Tell us a bit about yourself so we can personalize your experience.</p>
+        <p>
+          Tell us a bit about yourself so we can personalize your experience.
+        </p>
 
         <section className="profile-card">
           <h2>Basic info</h2>
@@ -203,7 +208,9 @@ export default function Profile() {
                 key={pref.value}
                 type="button"
                 className={
-                  form.preferences?.includes(pref.value) ? "chip active" : "chip"
+                  form.preferences?.includes(pref.value)
+                    ? "chip active"
+                    : "chip"
                 }
                 onClick={() => togglePreference(pref.value)}
               >
