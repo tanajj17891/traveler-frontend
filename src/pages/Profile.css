@@ -1,0 +1,113 @@
+.profile-page {
+  min-height: 100vh;
+  background: #eeeef5;
+  padding: 3rem 1rem;
+  font-family: Inter, sans-serif;
+}
+
+.profile-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.profile-container h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #1a1a2e;
+}
+
+.profile-container p {
+  color: #777;
+  margin-bottom: 2rem;
+}
+
+.profile-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e8e8f4;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.profile-card h2 {
+  color: #3b3dbd;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.profile-grid input,
+.profile-grid select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #d9d9ea;
+  border-radius: 8px;
+  background: #f8f8fc;
+  font-size: 0.95rem;
+}
+
+.profile-grid input:focus,
+.profile-grid select:focus {
+  outline: none;
+  border-color: #3b3dbd;
+  background: white;
+}
+
+.chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.chip {
+  border: 1px solid #d9d9ea;
+  background: #f8f8fc;
+  color: #666;
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.chip:hover {
+  border-color: #3b3dbd;
+}
+
+.chip.active {
+  background: #ededf8;
+  border-color: #3b3dbd;
+  color: #3b3dbd;
+  font-weight: 600;
+}
+
+.save-profile-btn {
+  background: #3b3dbd;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.9rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  float: right;
+}
+
+.save-profile-btn:hover {
+  background: #2d2fa8;
+}
+
+@media (max-width: 768px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .save-profile-btn {
+    width: 100%;
+    float: none;
+  }
+}

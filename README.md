@@ -78,3 +78,27 @@ export default defineConfig([
 - Route 53 A and AAAA records point littletraveler.net to the CloudFront distribution
 - CloudFront default root object is set to index.html
 - npm run build , Re-upload the contents of the dist folder to the littletraveler.net S3 bucket
+
+### REDPLOYING frontend
+- npm run build
+- Go to AWS S3 → littletraveler.net bucket
+- Select all existing files and folders → click Delete
+- Click Upload → drag in all contents of the dist folder (files + assets folder)
+- Click Upload
+- Go to CloudFront → littletraveler distribution
+- Click Invalidations tab → Create invalidation
+- Enter /* as the path → click Create invalidation
+
+### How are we fixing the email?
+- we save ID token that contains email
+- pre propulate the form
+- read only 
+### What is Rem?
+- 1rem stands for "root em" and equals the font-size of the root element (the <html> tag).
+- If you explicitly change the font-size of your <html> element in your CSS stylesheet, 1rem
+
+### What is content, padding, brorder and margin?
+- Content: The text, images, or child items.
+- Padding: The internal breathing room surrounding the content.
+- Border: The line wrapping around the padding and content.
+- Margin: The empty space outside the border used to separate the element from other elements.

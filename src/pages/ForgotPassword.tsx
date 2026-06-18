@@ -8,6 +8,7 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleForgotPassword = async () => {
@@ -18,7 +19,7 @@ const ForgotPassword = () => {
       setError("Please enter your email.");
       return;
     }
-
+    setLoading(true);
     try {
       await api.post("/auth/forgot-password", { email });
       setSuccess("Verification code sent to email");
@@ -26,8 +27,9 @@ const ForgotPassword = () => {
     } catch (err) {
       const error = err as AxiosError<{ message: string }>; //tells TS that it knows its an axios error, string tells TS what the response data from backend is
       setError(error.response?.data?.message || "Password reset failed.");
+    } finally {
+      setLoading(false);
     }
-      
   };
 
   return (
@@ -41,7 +43,9 @@ const ForgotPassword = () => {
     >
       <div className="signup-form-inputs">
         {error && <p style={{ color: "red", margin: "0 0 8px" }}>{error}</p>}
-        {success && <p style={{ color: "green", margin: "0 0 8px" }}>{success}</p>}
+        {success && (
+          <p style={{ color: "green", margin: "0 0 8px" }}>{success}</p>
+        )}
 
         <input
           type="email"
@@ -52,8 +56,19 @@ const ForgotPassword = () => {
         />
       </div>
       <div className="signup-form-regist-button">
-        <button className="signup-button" onClick={handleForgotPassword}>
-          Send Code
+        <button
+          className="signup-button"
+          onClick={handleForgotPassword}
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <span className="spinner"></span>
+              Resetting password...
+            </>
+          ) : (
+            "Reset password"
+          )}
         </button>
       </div>
     </AuthLayout>
