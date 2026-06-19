@@ -111,3 +111,27 @@
     float: none;
   }
 }
+.pp-signout {
+  margin-top: 1rem;
+  padding: 1rem 1.5rem;
+}
+
+.pp-signout-btn {
+  width: 100%;
+
+  border: none;
+  border-radius: 12px;
+
+  padding: 0.9rem;
+
+  background: #ef4444;
+  color: white;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.pp-signout-btn:hover {
+  background: #dc2626;
+}

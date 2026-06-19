@@ -36,3 +36,17 @@ export const getProfile = async (cognitoSub: string, token: string) => {
 
   return response.data;
 };
+
+ export const updateProfile = async (
+  cognitoSub: string,
+  profileData: Partial<CreateProfileRequest>,
+  token: string
+) => {
+  const response = await api.put(`/profile/${cognitoSub}`, profileData,{
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};
