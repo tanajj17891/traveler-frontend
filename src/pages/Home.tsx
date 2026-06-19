@@ -3,7 +3,6 @@ import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import {
-  FaBell,
   FaCalendarAlt,
   FaCheck,
   FaCompass,
@@ -68,6 +67,7 @@ export default function Home() {
   const [isSavingProfile, setIsSavingProfile] = useState(false); // controls save button loading state
   const [profile, setProfile] = useState<CreateProfileRequest>(emptyProfile); // stores profile data
   const navigate = useNavigate();
+
   const handleSignOut = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("idToken");
@@ -218,9 +218,10 @@ export default function Home() {
         </div>
 
         <div className="navbar-profile">
-          <button className="notification-btn" aria-label="Notifications">
-            <FaBell />
-            <span />
+          {/* The Sign Out Button */}
+          <button type="button" onClick={handleSignOut} className="signout-btn">
+            {" "}
+            Sign Out{" "}
           </button>
 
           <button
@@ -285,7 +286,7 @@ export default function Home() {
                   >
                     {isEditingProfile ? (
                       <>
-                        <FaTimes /> Cancel
+                     
                       </>
                     ) : (
                       <>
@@ -452,17 +453,7 @@ export default function Home() {
                 </div>
               </section>
             </div>
-             
-  {!isEditingProfile && (
-  <div className="pp-signout">
-    <button
-      className="pp-signout-btn"
-      onClick={handleSignOut}
-    >
-      Sign Out
-    </button>
-  </div>
-)}
+
             {isEditingProfile && (
               <div className="pp-footer">
                 <button
@@ -479,7 +470,6 @@ export default function Home() {
                 >
                   {isSavingProfile ? "Saving..." : "Save changes"}
                 </button>
-                <div className="pp-signout"></div>
               </div>
             )}
           </aside>
@@ -489,7 +479,10 @@ export default function Home() {
       <section className="hero-section">
         <div className="hero-inner">
           <div className="hero-content">
-            <h1>Welcome back, {profile.firstName || "Traveler"}!</h1>
+            <h1>
+              Welcome back,{" "}
+              {profile.firstName?.charAt(0)?.toUpperCase() || "Traveler"}!
+            </h1>
             <p>
               Your next adventure to Cancún is in 18 days. Keep planning or
               start something new.
