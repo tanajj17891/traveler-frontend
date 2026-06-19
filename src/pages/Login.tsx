@@ -62,6 +62,7 @@ const Login = () => {
       const data = error.response?.data?.error;
       const message = data?.data?.[0] ?? data?.description ?? "Login failed";
       toast.error(message);
+      setLoading(false);
     }
   };
 

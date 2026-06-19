@@ -5,8 +5,19 @@ import {
   FaCompass,
   FaCalendarAlt,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false); {/* starts in a false state because menu has not been clicked*/}
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("idToken");
+
+    navigate("/login");
+  };
   return (
     <main className="home-page">
       <header className="navbar">
@@ -44,11 +55,20 @@ export default function Home() {
             Calendar
           </a>
         </nav>
-
         <div className="navbar-profile">
           <button className="notification-btn">🔔</button>
 
-          <div className="avatar">AR</div>
+          <div className="avatar-menu">
+            <button className="avatar" onClick={() => setMenuOpen(!menuOpen)}> {/*set menu becomes true after user clicks on it , from false to true */}
+              TA
+            </button>
+
+            {menuOpen && (
+              <div className="profile-dropdown">
+                <button onClick={handleSignOut}>Sign Out</button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
       <section className="hero-section">
