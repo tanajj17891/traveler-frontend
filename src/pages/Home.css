@@ -523,21 +523,7 @@
   .pp-body { padding: 1rem; }
   .pp-field-row { grid-template-columns: 1fr; gap: 0; }
 }
- .signout-btn {
-   
-       flex: 2;
-      font-size: 13px;
-      font-weight: 600;
-      color: #fff;
-      background: #bb56d9;
-      border: none;
-      border-radius: 9px;
-      padding: 12px 12px;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      display: flex; align-items: center; justify-content: center; gap: 7px;
-      transition: background 0.15s;
-    }
+
     
    
     .pp-btn-save {
@@ -555,7 +541,7 @@
       transition: background 0.15s;
     }
     .pp-btn-save:hover { background: #3b3dbd; }
-    .pp-btn-save i, .pp-btn-signout i { font-size: 15px; }
+   
 
     /* 1. Remove background layout gaps and shadows inside the panel body */
 .pp-body {

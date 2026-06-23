@@ -17,6 +17,7 @@ import {
   FaShareAlt,
   FaShieldAlt,
   FaTimes,
+  FaSignOutAlt
 } from "react-icons/fa";
 import {
   getProfile,
@@ -69,6 +70,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   const handleSignOut = () => {
+    
     localStorage.removeItem("accessToken");
     localStorage.removeItem("idToken");
 
@@ -214,15 +216,15 @@ export default function Home() {
             <a href="#">
               <FaCalendarAlt /> Calendar
             </a>
+             <a href="#" onClick={handleSignOut} >
+              <FaSignOutAlt/> Sign Out
+              <button type="button" className="signout-btn">
+          </button>
+            </a>
           </nav>
         </div>
 
         <div className="navbar-profile">
-          {/* The Sign Out Button */}
-          <button type="button" onClick={handleSignOut} className="signout-btn">
-            {" "}
-            Sign Out{" "}
-          </button>
 
           <button
             className="avatar"
