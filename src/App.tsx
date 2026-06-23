@@ -7,6 +7,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile"; 
 import Home from './pages/Home';
+import ProtectedRoute from './pages/ProtectedRoute';
 
 function App() {
   return (
@@ -19,8 +20,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route element={<ProtectedRoute />}>
         <Route path="/profile" element={<Profile />} />
         <Route path="/home" element={<Home />} />
+        </Route>
+        
+        
       </Routes>
     </>
   );

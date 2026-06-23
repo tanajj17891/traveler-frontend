@@ -36,7 +36,7 @@
 
 .navbar-logo {
   gap: 9px;
-  color: #9c3bbd;
+  color: #3b3dbd;
   text-decoration: none;
 }
 
@@ -64,7 +64,7 @@
 
 .navbar-links a:hover,
 .navbar-links a.active {
-  color: #9c3bbd;;
+  color: #3b3dbd;;
   background: #ededf8;
 }
 
@@ -81,18 +81,18 @@
   height: 34px;
   border: 1.5px solid #c5c6ef;
   border-radius: 50%;
-  color: #9c3bbd;
+  color: #3b3dbd;
   background: #ededf8;
   font-size: 12px;
   font-weight: 700;
 }
 
-.avatar:hover { border-color: #9c3bbd;; background: #ddddf5; }
+.avatar:hover { border-color: #3b3dbd;; background: #ddddf5; }
 
 .hero-section {
   padding: 2.6rem 2rem 4.2rem;
   color: #fff;
-  background: #9c3bbd;;
+  background: #3b3dbd;;
 }
 
 .hero-inner,
@@ -123,7 +123,7 @@
   padding: 10px 20px;
   border: 0;
   border-radius: 9px;
-  color: #9c3bbd;;
+  color: #3b3dbd;;
   background: #fff;
   font-size: 13px;
   font-weight: 700;
@@ -179,7 +179,7 @@
   height: 40px;
   margin-bottom: 12px;
   border-radius: 10px;
-  color: #9c3bbd;
+  color: #3b3dbd;
   background: #ededf8;
 }
 
@@ -201,7 +201,7 @@
 }
 
 .section-heading h2 { margin: 0; font-size: 15px; }
-.section-heading a { color: 9c3bbd; font-size: 12px; text-decoration: none; }
+.section-heading a { color: 3b3dbd; font-size: 12px; text-decoration: none; }
 
 .trip-card {
   display: flex;
@@ -223,7 +223,7 @@
 .trip-card em {
   padding: 4px 10px;
   border-radius: 999px;
-  color: #9c3bbd;
+  color: #3b3dbd;
   background: #ededf8;
   font-size: 11px;
   font-style: normal;
@@ -284,7 +284,7 @@
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  color: #9c3bbd;
+  color: #3b3dbd;
   background: #ededf8;
 }
 
@@ -366,7 +366,7 @@
   padding: 1.5rem;
   border-radius: 14px;
   color: #fff;
-  background: #9c3bbd;
+  background: #3b3dbd;
   margin-bottom: 0.75rem; 
 }
 
@@ -400,7 +400,7 @@
   margin-bottom: 0.75rem; 
 }
 
-.pp-stats strong { color: #9c3bbd; font-size: 20px; }
+.pp-stats strong { color: #3b3dbd; font-size: 20px; }
 .pp-stats span { margin-top: 2px; color: #aaa; font-size: 11px; }
 
 .pp-card {
@@ -419,7 +419,7 @@
 
 .pp-card-head h3 {
   margin: 0;
-  color: #9c3bbd;
+  color: #3b3dbd;
   font-size: 12px;
   letter-spacing: .05em;
   text-transform: uppercase;
@@ -432,7 +432,7 @@
   padding: 5px 10px;
   border: 0;
   border-radius: 6px;
-  color: #9c3bbd;
+  color: #3b3dbd;
   background: #ededf8;
   font-size: 11px;
   font-weight: 600;
@@ -545,7 +545,7 @@
       font-size: 13px;
       font-weight: 600;
       color: #fff;
-      background: #9c3bbd;
+      background: #3b3dbd;
       border: none;
       border-radius: 9px;
       padding: 9px 0;
@@ -554,7 +554,7 @@
       display: flex; align-items: center; justify-content: center; gap: 7px;
       transition: background 0.15s;
     }
-    .pp-btn-save:hover { background: #9c3bbd; }
+    .pp-btn-save:hover { background: #3b3dbd; }
     .pp-btn-save i, .pp-btn-signout i { font-size: 15px; }
 
     /* 1. Remove background layout gaps and shadows inside the panel body */
