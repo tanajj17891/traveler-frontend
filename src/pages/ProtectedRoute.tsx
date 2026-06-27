@@ -13,7 +13,7 @@ export default function ProtectedRoute() {
  
     if (accessToken) {
       try {
-        console.log('here');
+
         const decoded = jwtDecode<TokenPayload>(accessToken); //decodes the access token 
         const isExpired = !!decoded.exp && decoded.exp > Date.now() / 1000; /* JSON Web Tokens express their expiration time (exp) in seconds. 
         However, JavaScript's Date.now() returns the current time in milliseconds. The code divides Date.now() / 1000 to convert milliseconds to seconds so they can be compared properly. */

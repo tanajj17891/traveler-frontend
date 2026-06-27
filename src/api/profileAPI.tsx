@@ -29,7 +29,7 @@ export const createProfile = async (
 };
 
 export const getProfile = async (email: string, token: string) => {
-  console.log(email)
+
   const response = await api.get(`/profile?email=${email}`, { //gets access token from backend 
     headers: {
       Authorization: `Bearer ${token}`,

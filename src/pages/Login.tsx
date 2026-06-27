@@ -49,7 +49,7 @@ const Login = () => {
         setLoading(false);
       }
 
-      console.log(data);
+    
     } catch (err) {
       const error = err as AxiosError<{
         error: { description: string; data: string[] };
