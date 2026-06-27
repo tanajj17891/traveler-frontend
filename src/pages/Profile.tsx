@@ -53,6 +53,7 @@ export default function Profile() {
     city: "",
     travelStyle: [],
     preferences: [],
+    profileId: ""
   });
 
   const handleChange = (
