@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import {
@@ -20,18 +19,14 @@ import {
   FaSignOutAlt
 } from "react-icons/fa";
 import {
-  getProfile,
   updateProfile,
   type CreateProfileRequest,
 } from "../api/profileAPI";
 import "./Home.css";
-type CognitoPayload = {
-  sub: string;
-  email?: string;
-};
 
 const emptyProfile: CreateProfileRequest = {
   cognitoSub: "",
+  profileId: "",
   email: "",
   firstName: "",
   lastName: "",
@@ -82,17 +77,19 @@ export default function Home() {
     const loadProfile = async () => {
       const idToken = localStorage.getItem("idToken");
       const accessToken = localStorage.getItem("accessToken");
+      const profileString = localStorage.getItem("profile")
+      const profile = profileString ? JSON.parse(profileString) : null;
 
       if (!idToken || !accessToken) {
         return;
       }
 
       try {
-        const decoded = jwtDecode<CognitoPayload>(idToken);
-        const existingProfile = await getProfile(decoded.sub, accessToken);
+        const existingProfile = profile
 
         setProfile({
           cognitoSub: existingProfile.cognitoSub,
+          profileId: existingProfile.profileId,
           email: existingProfile.email,
           firstName: existingProfile.firstName ?? "",
           lastName: existingProfile.lastName ?? "",
@@ -159,7 +156,7 @@ export default function Home() {
     // sends updated profile data to backend
     const accessToken = localStorage.getItem("accessToken");
 
-    if (!accessToken || !profile.cognitoSub) {
+    if (!accessToken || !profile.profileId) {
       toast.error("Please log in again to update your profile.");
       return;
     }
@@ -167,7 +164,7 @@ export default function Home() {
     setIsSavingProfile(true);
 
     try {
-      await updateProfile(profile.cognitoSub, profile, accessToken); // attempt the update , await calls the backend
+      await updateProfile(profile.profileId, profile, accessToken); // attempt the update , await calls the backend
 
       toast.success("Profile updated successfully!");
       setIsEditingProfile(false);

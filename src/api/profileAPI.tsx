@@ -2,7 +2,8 @@ import api from "./axios"; // does all the backends calls
 
 
 export type CreateProfileRequest = { // This function expects an object shaped like a profile.
-  cognitoSub: string;
+  cognitoSub: string
+  profileId: string;
   email: string;
   firstName?: string;
   lastName?: string;
@@ -27,8 +28,9 @@ export const createProfile = async (
   return response.data;
 };
 
-export const getProfile = async (cognitoSub: string, token: string) => {
-  const response = await api.get(`/profile/${cognitoSub}`, { //gets access token from backend 
+export const getProfile = async (email: string, token: string) => {
+  console.log(email)
+  const response = await api.get(`/profile?email=${email}`, { //gets access token from backend 
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -38,11 +40,11 @@ export const getProfile = async (cognitoSub: string, token: string) => {
 };
 
  export const updateProfile = async (
-  cognitoSub: string,
+  profileId: string,
   profileData: Partial<CreateProfileRequest>,
   token: string
 ) => {
-  const response = await api.put(`/profile/${cognitoSub}`, profileData,{
+  const response = await api.put(`/profile/${profileId}`, profileData,{
     headers: {
       Authorization: `Bearer ${token}`,
     },

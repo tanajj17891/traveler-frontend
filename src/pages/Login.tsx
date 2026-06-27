@@ -5,13 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import AuthLayout from "../components/authLayout";
 import api from "../api/axios";
 import { AxiosError } from "axios";
-import { jwtDecode } from "jwt-decode";
 import { getProfile } from "../api/profileAPI";
-
-type CognitoPayload = {
-  sub: string;
-  email?: string;
-};
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -37,15 +31,16 @@ const Login = () => {
 
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("idToken", data.idToken);
+      localStorage.setItem("email", email);
 
       toast.success("Logged in!");
 
-      const decoded = jwtDecode<CognitoPayload>(data.idToken);
-      const cognitoSub = decoded.sub; // decodes the id token to get the cognito user id
-
       try {
         // try catch bc getprofile is an async api call and it returns a promise not the actual profile , its not just a true false thing
-        await getProfile(cognitoSub, data.accessToken); // checks if the user has a profile
+        const profile = await getProfile(email, data.accessToken); // checks if the user has a profile
+        if (profile) {
+          localStorage.setItem("profile", JSON.stringify(profile))
+        }
         // await new Promise((resolve) => setTimeout(resolve, 1000));
         navigate("/home"); // if yes then navigate to home
       } catch {
