@@ -16,13 +16,11 @@ import {
   FaShareAlt,
   FaShieldAlt,
   FaTimes,
-  FaSignOutAlt
+  FaSignOutAlt,
 } from "react-icons/fa";
-import {
-  updateProfile,
-  type CreateProfileRequest,
-} from "../api/profileAPI";
+import { updateProfile, type CreateProfileRequest } from "../api/profileAPI";
 import "./Home.css";
+import { getTripsByProfileId, type Trip } from "../api/createTripAPI";
 
 const emptyProfile: CreateProfileRequest = {
   cognitoSub: "",
@@ -62,30 +60,32 @@ export default function Home() {
   const [isEditingProfile, setIsEditingProfile] = useState(false); // controls view mode vs edit mode
   const [isSavingProfile, setIsSavingProfile] = useState(false); // controls save button loading state
   const [profile, setProfile] = useState<CreateProfileRequest>(emptyProfile); // stores profile data
+  const [trips, setTrips] = useState<Trip[]>([]); //previously the trips of array did not excist inside the use state so it didnt know what was inside the array bnut now it does
   const navigate = useNavigate();
 
   const handleSignOut = () => {
-    
     localStorage.removeItem("accessToken");
     localStorage.removeItem("idToken");
 
     navigate("/login");
   };
 
+  const handleCreateTrip = () => {
+    navigate("/create-trip");
+  };
+
   useEffect(() => {
-    // loads the logged-in user's saved profile when the homepage opens
     const loadProfile = async () => {
       const idToken = localStorage.getItem("idToken");
       const accessToken = localStorage.getItem("accessToken");
-      const profileString = localStorage.getItem("profile")
-      const profile = profileString ? JSON.parse(profileString) : null;
+      const profileString = localStorage.getItem("profile");
 
-      if (!idToken || !accessToken) {
+      if (!idToken || !accessToken || !profileString) {
         return;
       }
 
       try {
-        const existingProfile = profile
+        const existingProfile = JSON.parse(profileString);
 
         setProfile({
           cognitoSub: existingProfile.cognitoSub,
@@ -100,6 +100,13 @@ export default function Home() {
           travelStyle: existingProfile.travelStyle ?? [],
           preferences: existingProfile.preferences ?? [],
         });
+
+        const loadedTrips = await getTripsByProfileId(
+          existingProfile.profileId,
+          accessToken,
+        );
+
+        setTrips(loadedTrips);
       } catch (error) {
         console.error(error);
         toast.error("Failed to load profile");
@@ -213,16 +220,14 @@ export default function Home() {
             <a href="#">
               <FaCalendarAlt /> Calendar
             </a>
-             <a href="#" onClick={handleSignOut} >
-              <FaSignOutAlt/> Sign Out
-              <button type="button" className="signout-btn">
-          </button>
+            <a href="#" onClick={handleSignOut}>
+              <FaSignOutAlt /> Sign Out
+              <button type="button" className="signout-btn"></button>
             </a>
           </nav>
         </div>
 
         <div className="navbar-profile">
-
           <button
             className="avatar"
             onClick={openProfile}
@@ -284,9 +289,7 @@ export default function Home() {
                     onClick={() => setIsEditingProfile(!isEditingProfile)}
                   >
                     {isEditingProfile ? (
-                      <>
-                     
-                      </>
+                      <></>
                     ) : (
                       <>
                         <FaPen /> Edit
@@ -486,9 +489,6 @@ export default function Home() {
               Your next adventure to Cancún is in 18 days. Keep planning or
               start something new.
             </p>
-            <button className="new-trip-btn">
-              <FaPlus /> New trip plan
-            </button>
           </div>
 
           <div className="hero-stats">
@@ -512,11 +512,13 @@ export default function Home() {
 
       <div className="home-content">
         <section className="quick-actions">
-          <button className="action-card">
+          <button className="action-card" onClick={handleCreateTrip}>
             <span>
               <FaPlus />
             </span>
+
             <strong>Create trip</strong>
+
             <small>Plan a new vacation from scratch</small>
           </button>
 
@@ -552,34 +554,32 @@ export default function Home() {
               <a href="#">See all →</a>
             </div>
 
-            {[
-              [
-                "Cancún, Mexico",
-                "Jun 19 – Jun 26, 2026 · 7 nights",
-                "Upcoming",
-              ],
-              [
-                "New York City, USA",
-                "Aug 4 – Aug 8, 2026 · 4 nights",
-                "Planning",
-              ],
-              ["Banff, Canada", "Sep 12 – Sep 18, 2026 · 6 nights", "Planning"],
-            ].map(([name, dates, status]) => (
-              <article className="trip-card" key={name}>
-                <span className="trip-icon">
-                  <FaPlane />
-                </span>
+            {trips.length === 0 ? (
+              <p>No trips yet.</p>
+            ) : (
+              trips.map((trip) => (
+                <article className="trip-card" key={trip.tripId}>
+                  <span className="trip-icon">
+                    <FaPlane />
+                  </span>
 
-                <div>
-                  <h3>{name}</h3>
-                  <p>
-                    <FaCalendarAlt /> {dates}
-                  </p>
-                </div>
+                  <div>
+                    <h3>{trip.tripName}</h3>
 
-                <em className={status.toLowerCase()}>{status}</em>
-              </article>
-            ))}
+                    <p>
+                      <FaCalendarAlt />{" "}
+                      {trip.destination.length > 0
+                        ? trip.destination[0].name
+                        : "No destination"}
+                    </p>
+                  </div>
+
+                  <em className={(trip.status || "planning").toLowerCase()}>
+                    {trip.status || "Planning"}
+                  </em>
+                </article>
+              ))
+            )}
           </div>
 
           <div>
