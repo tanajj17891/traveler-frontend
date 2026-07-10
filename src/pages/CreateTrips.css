@@ -305,4 +305,26 @@
   .steps-track {
     flex-wrap: wrap;
   }
+  .add-stop-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.add-stop-icon {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: #3b3dbd;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-stop-icon:hover {
+  background: #2e30a8;
+}
 }

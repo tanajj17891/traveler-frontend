@@ -3,7 +3,7 @@ import api from "./axios"; // does all the backends calls
 
 export type CreateProfileRequest = { // This function expects an object shaped like a profile.
   cognitoSub: string
-  profileId: string;
+  profileId?: string;
   email: string;
   firstName?: string;
   lastName?: string;

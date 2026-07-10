@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FaArrowLeft,
-  FaBell,
   FaMapMarkerAlt,
   FaUsers,
   FaDollarSign,
@@ -82,9 +80,6 @@ export default function CreateTrips() {
     { ...EMPTY_DESTINATION },
   ]);
 
-  const [travelersInput, setTravelersInput] = useState("");
-  const [travelers, setTravelers] = useState<string[]>([]);
-
   const [budget, setBudget] = useState<BudgetForm>({
     currency: "USD",
     total: "",
@@ -129,8 +124,6 @@ export default function CreateTrips() {
     );
   };
 
-  
-
   const updateDestinationDate = (
     // Updates either the arrival or leaving date for a specific destination by its index.
     // Dynamically targets the specified date field while keeping all other destination properties unchanged.
@@ -144,21 +137,20 @@ export default function CreateTrips() {
     );
   };
 
-  const addTraveler = () => {
-    // Validates and appends a non-empty traveler name to the state list, then clears the input field.
+  const [travelerEmail, setTravelerEmail] = useState("");
+  const [travelerEmails, setTravelerEmails] = useState<string[]>([]);
 
-    const value = travelersInput.trim();
-    if (!value) return;
-    setTravelers((prev) => [
-      ...prev,
-      value,
-    ]); /*By using [...prev], i camn create a brand-new array container. React notices this new container and instantly updates  UI to show the new traveler. */
-    setTravelersInput("");
+  const addTravelerEmail = () => {
+    const email = travelerEmail.trim();
+
+    if (!email) return;
+
+    setTravelerEmails((prev) => [...prev, email]);
+    setTravelerEmail("");
   };
 
-  const removeTraveler = (id: string) => {
-    //// Removes a specific traveler from the state list by filtering out their unique identifier.
-    setTravelers((prev) => prev.filter((t) => t !== id));
+  const removeTravelerEmail = (email: string) => {
+    setTravelerEmails((prev) => prev.filter((item) => item !== email));
   };
 
   const handleBudgetChange = (field: keyof BudgetForm, value: string) => {
@@ -181,18 +173,24 @@ export default function CreateTrips() {
     console.log("profileId:", profileId);
     console.log("all localStorage:", localStorage);
 
-    if (!accessToken || !profileId) {
-      alert("Please log in again.");
+    if (!accessToken) {
+      alert("Access token is missing.");
+      return;
+    }
+    if(!profileId) {
+      alert("Profile id is missing");
       return;
     }
 
-    const payload: CreateTripRequest = {
-      // Constructs the structured request payload by sanitizing inputs, casting budget numbers, and formatting metadata to create a new trip.
+    
 
+    const payload: CreateTripRequest = {
+      // Constructs the structured request payload by sanitizing inputs, casting budget numbers, and formatting to create a new trip.
+     
       profileId,
       tripName: tripName || "New trip",
       destination: destinations,
-      travelers: [profileId, ...travelers],
+      travelers: travelerEmails, // previously i did [traveleremails] which was creating an array of the array traveleremails hence the error of never finding that email in my backend , then i changed to this 
       budget: {
         currency: budget.currency,
         total: toNum(budget.total),
@@ -249,28 +247,8 @@ export default function CreateTrips() {
     { n: 4, label: "Notes", icon: <FaStickyNote /> },
   ] as const;
 
-  
-
   return (
     <main className="create-trip-page">
-      <header className="create-trip-navbar">
-        <div className="create-trip-left">
-          <button className="back-btn" onClick={() => navigate("/home")}>
-            <FaArrowLeft /> Back
-          </button>
-          <div className="navbar-logo-text">
-            <h2>Traveler</h2>
-            <span>Traveling made easy</span>
-          </div>
-        </div>
-        <div className="create-trip-profile">
-          <button className="notification-btn" aria-label="Notifications">
-            <FaBell />
-          </button>
-          <div className="avatar">AR</div>
-        </div>
-      </header>
-
       <section className="create-trip-container">
         <div className="wizard-header">
           <h1>Plan a new trip</h1>
@@ -306,9 +284,6 @@ export default function CreateTrips() {
 
                   <div className="section-subhead">
                     <h3>Destinations</h3>
-                    <button onClick={addDestination}>
-                      <FaPlus /> 
-                    </button>
                   </div>
 
                   {destinations.map((dest, index) => (
@@ -321,6 +296,9 @@ export default function CreateTrips() {
                         >
                           <FaTrash />
                         </button>
+                        <div className="add-stop-container">
+                     
+                        </div>
                       </div>
 
                       <label>Destination</label>
@@ -370,6 +348,15 @@ export default function CreateTrips() {
                       </div>
                     </div>
                   ))}
+                  <div className="add-stop-container">
+                    <button
+                      type="button"
+                      className="add-stop-icon"
+                      onClick={addDestination}
+                    >
+                      <FaPlus />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="step-actions right">
@@ -384,29 +371,43 @@ export default function CreateTrips() {
               <>
                 <div className="trip-form-card">
                   <h2>Who's coming?</h2>
-                  <p>Add traveler profile IDs for people joining this trip.</p>
+                  <p>Add traveler emails for people joining this trip.</p>
 
-                  <label>Traveler profile ID</label>
+                  <label>Traveler email</label>
+
                   <div className="inline-input">
                     <input
-                      value={travelersInput}
-                      onChange={(e) => setTravelersInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && addTraveler()}
-                      placeholder="Paste traveler profile ID"
+                      value={travelerEmail}
+                      onChange={(e) => setTravelerEmail(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addTravelerEmail();
+                        }
+                      }}
+                      placeholder="Enter traveler email"
                     />
-                    <button onClick={addTraveler}>Add</button>
+
+                    <button type="button" onClick={addTravelerEmail}>
+                      Add
+                    </button>
                   </div>
 
                   <div className="traveler-list">
-                    {travelers.length === 0 ? (
+                    {travelerEmails.length === 0 ? (
                       <p className="empty-text">
                         No extra travelers added yet.
                       </p>
                     ) : (
-                      travelers.map((id) => (
-                        <span className="traveler-chip" key={id}>
-                          {id}
-                          <button onClick={() => removeTraveler(id)}>×</button>
+                      travelerEmails.map((email) => (
+                        <span className="traveler-chip" key={email}>
+                          {email}
+                          <button
+                            type="button"
+                            onClick={() => removeTravelerEmail(email)}
+                          >
+                            ×
+                          </button>
                         </span>
                       ))
                     )}
@@ -417,6 +418,7 @@ export default function CreateTrips() {
                   <button className="ghost-btn" onClick={() => setStep(1)}>
                     Back
                   </button>
+
                   <button className="primary-btn" onClick={() => setStep(3)}>
                     Budget
                   </button>
@@ -557,7 +559,7 @@ export default function CreateTrips() {
               </div>
               <div>
                 <small>Travelers</small>
-                <strong>{1 + travelers.length}</strong>
+                <strong>{1 + travelerEmails.length}</strong>
               </div>
               <div>
                 <small>Budget</small>

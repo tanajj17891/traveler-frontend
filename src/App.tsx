@@ -9,11 +9,14 @@ import Profile from "./pages/Profile";
 import Home from './pages/Home';
 import ProtectedRoute from './pages/ProtectedRoute';
 import CreateTrips from './pages/CreateTrips';
+import AppLayout from './components/appLayout';
+
 
 function App() {
   return (
     <>
       <Toaster position="top-right" />
+     
       <Routes>
         <Route path="/" element={<Signup />} />
         <Route path="/signup" element={<Signup />} />
@@ -24,10 +27,14 @@ function App() {
         <Route element={<ProtectedRoute />}>
         <Route path="/profile" element={<Profile />} />
         <Route path="/home" element={<Home />} />
+        <Route element={<AppLayout />}>
+        
         <Route path="/create-trip" element={<CreateTrips />} />
         </Route>
         
-        
+      
+
+        </Route>
       </Routes>
     </>
   );

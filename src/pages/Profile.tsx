@@ -31,7 +31,7 @@ const preferences = [
 ];
 
 export default function Profile() {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const idToken = localStorage.getItem("idToken"); // used to get real user info like email
 
   const decodedIdToken = idToken
@@ -52,8 +52,7 @@ export default function Profile() {
     state: "",
     city: "",
     travelStyle: [],
-    preferences: [],
-    profileId: ""
+    preferences: [], //profileid="" was after this but i removed it because i thought it might be overriding the profile id prisma is supposed to create
   });
 
   const handleChange = (
@@ -104,8 +103,11 @@ export default function Profile() {
         email: decodedCurrentIdToken.email ?? form.email, // always use email from token first
       };
 
-      await createProfile(profileData, currentAccessToken); // sends POST /profile with Authorization Bearer accessToken
-
+      const createdProfile = await createProfile( //Saved the profile returned by the backend after profile creation.
+        profileData,
+        currentAccessToken,
+      ); // sends POST /profile with Authorization Bearer accessToken
+      localStorage.setItem("profile", JSON.stringify(createdProfile));
       toast.success("Profile created successfully!");
       navigate("/home");
     } catch (error) {

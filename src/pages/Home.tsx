@@ -63,7 +63,7 @@ export default function Home() {
   const [trips, setTrips] = useState<Trip[]>([]); //previously the trips of array did not excist inside the use state so it didnt know what was inside the array bnut now it does
   const navigate = useNavigate();
 
-  const handleSignOut = () => {
+   const handleSignOut = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("idToken");
 
@@ -100,6 +100,14 @@ export default function Home() {
           travelStyle: existingProfile.travelStyle ?? [],
           preferences: existingProfile.preferences ?? [],
         });
+        console.log("Loaded profile:", existingProfile);
+      console.log("Loaded profileId:", existingProfile.profileId);
+
+          if (!existingProfile.profileId) {
+        console.log("No profileId found. Skipping trip request.");
+        setTrips([]);
+        return;
+      }
 
         const loadedTrips = await getTripsByProfileId(
           existingProfile.profileId,
@@ -109,7 +117,7 @@ export default function Home() {
         setTrips(loadedTrips);
       } catch (error) {
         console.error(error);
-        toast.error("Failed to load profile");
+        toast.error("Failed to load trips");
       }
     };
 

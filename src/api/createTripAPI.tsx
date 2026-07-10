@@ -52,7 +52,7 @@ export const getTrip = async (
   tripId: string,
   token: string
 ) => {
-  const response = await api.get(`/trips/${tripId}`, {
+  const response = await api.get(`/trips/by-id/${tripId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -92,7 +92,7 @@ export const getTripsByProfileId = async ( // will get all trips planned by one 
   profileId: string,
   token: string
 ): Promise<Trip[]> => {
-  const response = await api.get(`/trips/profile/${profileId}`, {
+  const response = await api.get(`/trips/by-profile/${profileId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
