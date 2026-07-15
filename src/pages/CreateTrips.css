@@ -136,12 +136,14 @@
   font-size: 0.9rem;
 }
 
-.trip-form-card input:focus,
-.trip-form-card select:focus,
+
 .trip-form-card textarea:focus {
-  outline: none;
-  border-color: #3b3dbd;
-  background: white;
+ 
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 12px;
 }
 
 .destination-card {
@@ -150,6 +152,9 @@
   border-radius: 14px;
   padding: 1rem;
   margin-top: 1rem;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
 .destination-card-head,
@@ -158,6 +163,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 12px;
+  width: 100%
 }
 
 .destination-card-head button,
@@ -166,6 +173,13 @@
   background: transparent;
   color: #3b3dbd;
   cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+
 }
 
 .two-column,
@@ -292,6 +306,53 @@
   color: #aaa;
   font-size: 0.85rem;
 }
+ .trip-summary-card {
+    position: static;
+  }
+
+  .steps-track {
+    flex-wrap: wrap;
+  }
+  .add-stop-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 14px;
+  }
+
+  .add-stop-icon {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: #3b3dbd;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  
+  .form-label {
+    font-size: 25px;
+    font-weight: 800;
+    color: #1f2937;
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .destination-delete {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.destination-delete button {
+  border: none;
+  background: transparent;
+  color: #3b3dbd;
+  cursor: pointer;
+}
 
 @media (max-width: 900px) {
   .create-trip-grid {
@@ -305,26 +366,7 @@
   .steps-track {
     flex-wrap: wrap;
   }
-  .add-stop-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 14px;
 }
 
-.add-stop-icon {
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 50%;
-  background: #3b3dbd;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+ 
 
-.add-stop-icon:hover {
-  background: #2e30a8;
-}
-}

@@ -275,7 +275,7 @@ export default function CreateTrips() {
                   <h2>Where are you going?</h2>
                   <p>Add one destination or build a multi-stop itinerary.</p>
 
-                  <label>Trip name</label>
+                  <label className="form-label">Trip name</label>
                   <input
                     value={tripName}
                     onChange={(e) => setTripName(e.target.value)}
@@ -283,7 +283,7 @@ export default function CreateTrips() {
                   />
 
                   <div className="section-subhead">
-                    <h3>Destinations</h3>
+                    <label className="form-label">Destinations</label>
                   </div>
 
                   {destinations.map((dest, index) => (
@@ -291,14 +291,14 @@ export default function CreateTrips() {
                       <div className="destination-card-head">
                         <strong>Stop {index + 1}</strong>
                         <button
-                          onClick={() => removeDestination(index)}
-                          aria-label={`Remove stop ${index + 1}`}
-                        >
-                          <FaTrash />
-                        </button>
-                        <div className="add-stop-container">
-                     
-                        </div>
+                      type="button"
+                      className="add-stop-icon"
+                      onClick={addDestination}
+                    >
+                      <FaPlus />
+                    </button>
+                        
+                        
                       </div>
 
                       <label>Destination</label>
@@ -346,17 +346,20 @@ export default function CreateTrips() {
                           />
                         </div>
                       </div>
-                    </div>
-                  ))}
-                  <div className="add-stop-container">
+                      <div className="destination-delete">
                     <button
                       type="button"
                       className="add-stop-icon"
-                      onClick={addDestination}
+                      onClick={() => removeDestination(index)}
+                      aria-label={`Remove stop ${index + 1}`}
                     >
-                      <FaPlus />
+                      <FaTrash />
                     </button>
                   </div>
+                    </div>
+                    
+                  ))}
+                  
                 </div>
 
                 <div className="step-actions right">
