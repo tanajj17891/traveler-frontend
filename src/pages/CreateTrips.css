@@ -163,8 +163,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  width: 100%
+  margin-bottom: 20px;
+ 
 }
 
 .destination-card-head button,
@@ -313,11 +313,7 @@
   .steps-track {
     flex-wrap: wrap;
   }
-  .add-stop-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 14px;
-  }
+
 
   .add-stop-icon {
     width: 42px;
@@ -330,6 +326,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 12px;
   }
 
   
@@ -338,7 +335,7 @@
     font-weight: 800;
     color: #1f2937;
     display: block;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
   }
 
   .destination-delete {

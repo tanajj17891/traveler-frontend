@@ -137,6 +137,21 @@ export default function CreateTrips() {
     );
   };
 
+  const getToday = () => {
+    const today = new Date(); // gets current time
+    const offset = today.getTimezoneOffset(); //converts timezones to local time
+    const localToday = new Date(today.getTime() - offset * 60 * 1000); // does the calculation
+
+    return localToday.toISOString().split("T")[0]; //seperates date from the time
+  };
+
+  const addOneDay = (date: string) => {
+    const nextDay = new Date(`${date}T00:00:00`); // takes date and then shifts to the next calendar day
+    nextDay.setDate(nextDay.getDate() + 1);
+
+    return nextDay.toISOString().split("T")[0];
+  };
+
   const [travelerEmail, setTravelerEmail] = useState("");
   const [travelerEmails, setTravelerEmails] = useState<string[]>([]);
 
@@ -177,20 +192,18 @@ export default function CreateTrips() {
       alert("Access token is missing.");
       return;
     }
-    if(!profileId) {
+    if (!profileId) {
       alert("Profile id is missing");
       return;
     }
 
-    
-
     const payload: CreateTripRequest = {
       // Constructs the structured request payload by sanitizing inputs, casting budget numbers, and formatting to create a new trip.
-     
+
       profileId,
       tripName: tripName || "New trip",
       destination: destinations,
-      travelers: travelerEmails, // previously i did [traveleremails] which was creating an array of the array traveleremails hence the error of never finding that email in my backend , then i changed to this 
+      travelers: travelerEmails, // previously i did [traveleremails] which was creating an array of the array traveleremails hence the error of never finding that email in my backend , then i changed to this
       budget: {
         currency: budget.currency,
         total: toNum(budget.total),
@@ -284,24 +297,23 @@ export default function CreateTrips() {
 
                   <div className="section-subhead">
                     <label className="form-label">Destinations</label>
-                  </div>
-
-                  {destinations.map((dest, index) => (
-                    <div className="destination-card" key={index}>
-                      <div className="destination-card-head">
-                        <strong>Stop {index + 1}</strong>
-                        <button
+                    <button
                       type="button"
                       className="add-stop-icon"
                       onClick={addDestination}
                     >
                       <FaPlus />
                     </button>
-                        
-                        
+                  </div>
+
+                  {destinations.map((dest, index) => (
+                    <div className="destination-card" key={index}>
+                      <div className="destination-card-head">
+                        <strong>Stop {index + 1}</strong>
                       </div>
 
                       <label>Destination</label>
+
                       <select
                         value={dest.name}
                         onChange={(e) =>
@@ -322,6 +334,18 @@ export default function CreateTrips() {
                           <input
                             type="date"
                             value={dest.arrivalDate}
+                            min={
+                              index === 0 // tells me which stop i am rendering
+                                ? getToday()
+                                : destinations[index - 1].leavingDate // if not the first stop, code lookjs at the previous stop to check when u are scheduled to leave it
+                                  ? addOneDay(
+                                      destinations[index - 1].leavingDate,
+                                    )
+                                  : getToday()
+                            }
+                            disabled={
+                              index > 0 && !destinations[index - 1].leavingDate
+                            } // doesnt let users check for stop 3 or 2 unless they have filled out stop 1 
                             onChange={(e) =>
                               updateDestinationDate(
                                 index,
@@ -336,6 +360,8 @@ export default function CreateTrips() {
                           <input
                             type="date"
                             value={dest.leavingDate}
+                            min={dest.arrivalDate || getToday()}
+                              disabled={!dest.arrivalDate}
                             onChange={(e) =>
                               updateDestinationDate(
                                 index,
@@ -347,19 +373,17 @@ export default function CreateTrips() {
                         </div>
                       </div>
                       <div className="destination-delete">
-                    <button
-                      type="button"
-                      className="add-stop-icon"
-                      onClick={() => removeDestination(index)}
-                      aria-label={`Remove stop ${index + 1}`}
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
+                        <button
+                          type="button"
+                          className="add-stop-icon"
+                          onClick={() => removeDestination(index)}
+                          aria-label={`Remove stop ${index + 1}`}
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
                     </div>
-                    
                   ))}
-                  
                 </div>
 
                 <div className="step-actions right">
