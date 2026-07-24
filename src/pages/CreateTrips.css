@@ -351,6 +351,54 @@
   cursor: pointer;
 }
 
+.location-autocomplete {
+  position: relative;
+}
+
+.location-suggestion-list {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+
+  background: white;
+  border: 1px solid #e0e0ee;
+  border-radius: 10px;
+  overflow: hidden;
+
+  box-shadow: 0 10px 25px
+    rgba(30, 30, 70, 0.15);
+}
+
+.location-suggestion-item {
+  display: block;
+  width: 100%;
+  padding: 12px;
+
+  border: none;
+  border-bottom: 1px solid #f0f0f6;
+  background: white;
+
+  color: #1a1a2e;
+  text-align: left;
+  cursor: pointer;
+}
+
+.location-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.location-suggestion-item:hover {
+  background: #f7f7fb;
+}
+
+.location-search-message {
+  padding: 8px 2px;
+  color: #999;
+  font-size: 12px;
+}
+
 @media (max-width: 900px) {
   .create-trip-grid {
     grid-template-columns: 1fr;

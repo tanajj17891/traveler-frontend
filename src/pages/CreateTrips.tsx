@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaMapMarkerAlt,
@@ -13,7 +13,12 @@ import {
   createTrip,
   type CreateTripRequest,
   type Destination,
-} from "../api/createTripAPI";
+} from "../api/tripsAPI";
+import {
+  getLocationSuggestions,
+  getPlaceDetails,
+  type LocationSuggestion,
+} from "../api/locationAPI";
 import "./CreateTrips.css";
 
 type BudgetForm = {
@@ -26,18 +31,15 @@ type BudgetForm = {
   misc: string;
 };
 
-type DestinationOption = {
+/* type DestinationOption = {
+
   label: string;
   latitude: number;
   longitude: number;
-};
 
-const DESTINATION_OPTIONS: DestinationOption[] = [
-  { label: "Cancún, Mexico", latitude: 21.1619, longitude: -86.8515 },
-  { label: "Paris, France", latitude: 48.8566, longitude: 2.3522 },
-  { label: "Tokyo, Japan", latitude: 35.6762, longitude: 139.6503 },
-  { label: "Bali, Indonesia", latitude: -8.5069, longitude: 115.2625 },
-];
+}; */
+
+
 
 const BUDGET_CATEGORIES = [
   "flights",
@@ -64,7 +66,7 @@ const EMPTY_DESTINATION: Destination = {
   latitude: 0,
   longitude: 0,
   arrivalDate: "",
-  leavingDate: "",
+  leaveDate: "",
 };
 
 export default function CreateTrips() {
@@ -80,6 +82,15 @@ export default function CreateTrips() {
     { ...EMPTY_DESTINATION },
   ]);
 
+const [locationSuggestions, setLocationSuggestions] = useState<
+  Record<number, LocationSuggestion[]>
+>({});
+
+const [searchingLocation, setSearchingLocation] = useState<
+  Record<number, boolean>
+>({});
+
+const searchTimers = useRef<Record<number, number>>({}); //keeps track of all active timers 
   const [budget, setBudget] = useState<BudgetForm>({
     currency: "USD",
     total: "",
@@ -93,7 +104,7 @@ export default function CreateTrips() {
   const [notes, setNotes] = useState("");
 
   const addDestination = () => {
-    //// Appends a new, independent empty destination object to the state array.
+    // Appends a new, independent empty destination object to the state array.
     setDestinations((prev) => [...prev, { ...EMPTY_DESTINATION }]);
   };
 
@@ -106,30 +117,14 @@ export default function CreateTrips() {
     finds the exact row number i clicked on (index), and throws it in the trash. It then keeps all the other rows exactly the same. */
   };
 
-  const updateDestinationName = (index: number, label: string) => {
-    //// Updates a specific destination's name and GPS coordinates based on a matching preset option.
-
-    const match = DESTINATION_OPTIONS.find((o) => o.label === label);
-    setDestinations((prev) =>
-      prev.map((d, i) =>
-        i === index
-          ? {
-              ...d,
-              name: label,
-              latitude: match?.latitude ?? 0,
-              longitude: match?.longitude ?? 0,
-            }
-          : d,
-      ),
-    );
-  };
+ 
 
   const updateDestinationDate = (
     // Updates either the arrival or leaving date for a specific destination by its index.
     // Dynamically targets the specified date field while keeping all other destination properties unchanged.
 
     index: number,
-    field: "arrivalDate" | "leavingDate",
+    field: "arrivalDate" | "leaveDate",
     value: string,
   ) => {
     setDestinations((prev) =>
@@ -184,9 +179,7 @@ export default function CreateTrips() {
     const accessToken = localStorage.getItem("accessToken");
     const savedProfile = localStorage.getItem("profile");
     const profileId = savedProfile ? JSON.parse(savedProfile).profileId : null;
-    console.log("accessToken:", accessToken);
-    console.log("profileId:", profileId);
-    console.log("all localStorage:", localStorage);
+ 
 
     if (!accessToken) {
       alert("Access token is missing.");
@@ -219,6 +212,7 @@ export default function CreateTrips() {
 
     try {
       setIsCreating(true);
+   
       await createTrip(payload, accessToken);
       alert("Trip created successfully!");
       navigate("/home");
@@ -240,7 +234,7 @@ export default function CreateTrips() {
       .filter(Boolean)
       .sort();
     const departures = namedDestinations
-      .map((d) => d.leavingDate)
+      .map((d) => d.leaveDate)
       .filter(Boolean)
       .sort();
     if (!arrivals.length || !departures.length) return null;
@@ -259,6 +253,134 @@ export default function CreateTrips() {
     { n: 3, label: "Budget", icon: <FaDollarSign /> },
     { n: 4, label: "Notes", icon: <FaStickyNote /> },
   ] as const;
+
+  const handleLocationSearch = ( //when user starts to type this function gets called 
+  index: number, //figures out which destination 
+  value: string,
+) => {
+  // Update what appears inside the input.
+  setDestinations((current) => //gets the current array and helps create a brand new one 
+    current.map((destination, destinationIndex) =>
+      destinationIndex === index
+        ? { //Creates a new destrination object 
+            ...destination, //copies the old properties so we dont lose starting and arrival date 
+            name: value,
+            latitude: 0, // we reset the coordinates once the user starts typing again bc we dont know what location they mean 
+            longitude: 0,
+          }
+        : destination,
+    ),
+  );
+
+  // Cancel the previous timer for this stop.
+  window.clearTimeout(searchTimers.current[index]); //cancels pending api requests as the user is typong , also known as debouncing , when the user stops typoing for 350 ms thats when the api gets called 
+
+  if (value.trim().length < 3) { // doesnt show suggestions if user has typed less than 3 characters 
+    setLocationSuggestions((current) => ({
+      ...current,
+      [index]: [],
+    }));
+
+    return;
+  }
+
+  searchTimers.current[index] = window.setTimeout(
+    async () => { // function will run after 200 ms
+      const accessToken =
+        localStorage.getItem("accessToken");
+
+      if (!accessToken) return;
+
+      try {
+        setSearchingLocation((current) => ({
+          ...current,
+          [index]: true,
+        }));
+
+        const suggestions =
+          await getLocationSuggestions( // where frontend calls my backend 
+            value.trim(),
+            accessToken,
+          );
+
+        setLocationSuggestions((current) => ({
+          ...current,
+          [index]: suggestions,
+        }));
+      } catch (error) {
+        console.error(
+          "Failed to load location suggestions:",
+          error,
+        );
+
+        setLocationSuggestions((current) => ({
+          ...current,
+          [index]: [],
+        }));
+      } finally {
+        setSearchingLocation((current) => ({
+          ...current,
+          [index]: false,
+        }));
+      }
+    },
+    200,
+  );
+};
+
+const selectLocation = async ( // runs after user selects a suggestion from the dropdown 
+  index: number,
+  suggestion: LocationSuggestion,
+) => {
+  const accessToken =
+    localStorage.getItem("accessToken");
+
+  if (!accessToken) {
+    alert("Please log in again.");
+    return;
+  }
+
+  try {
+    const place = await getPlaceDetails(
+      suggestion.placeId, //what i got back from my autocomplete api 
+      accessToken,
+    );
+
+    setDestinations((current) =>
+      current.map((destination, destinationIndex) =>
+        destinationIndex === index
+          ? {
+              ...destination,
+
+              // Keep arrivalDate and leavingDate from
+              // the existing destination.
+              name:
+                place.displayName?.text ||
+                suggestion.name ||
+                place.formattedAddress ||
+                "",
+
+              latitude:
+                place.location?.latitude ?? 0,
+
+              longitude:
+                place.location?.longitude ?? 0,
+            }
+          : destination,
+      ),
+    );
+
+    setLocationSuggestions((current) => ({
+      ...current,
+      [index]: [],
+    }));
+  } catch (error) {
+    console.error(
+      "Failed to load place details:",
+      error,
+    );
+  }
+};
 
   return (
     <main className="create-trip-page">
@@ -314,19 +436,46 @@ export default function CreateTrips() {
 
                       <label>Destination</label>
 
-                      <select
-                        value={dest.name}
-                        onChange={(e) =>
-                          updateDestinationName(index, e.target.value)
-                        }
-                      >
-                        <option value="">Select a destination</option>
-                        {DESTINATION_OPTIONS.map((opt) => (
-                          <option key={opt.label} value={opt.label}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
+                     <div className="location-autocomplete">
+  <input
+    type="text"
+    value={dest.name}
+    placeholder="Search for a destination"
+    autoComplete="off"
+    onChange={(event) =>
+      handleLocationSearch(
+        index,
+        event.target.value,
+      )
+    }
+  />
+
+  {searchingLocation[index] && (
+    <div className="location-search-message">
+      Searching...
+    </div>
+  )}
+
+  {(locationSuggestions[index]?.length ?? 0) >
+    0 && (
+    <div className="location-suggestion-list">
+      {locationSuggestions[index].map(
+        (suggestion) => (
+          <button
+            type="button"
+            className="location-suggestion-item"
+            key={suggestion.placeId}
+            onClick={() =>
+              selectLocation(index, suggestion)
+            }
+          >
+            {suggestion.name}
+          </button>
+        ),
+      )}
+    </div>
+  )}
+</div>
 
                       <div className="two-column">
                         <div>
@@ -337,14 +486,14 @@ export default function CreateTrips() {
                             min={
                               index === 0 // tells me which stop i am rendering
                                 ? getToday()
-                                : destinations[index - 1].leavingDate // if not the first stop, code lookjs at the previous stop to check when u are scheduled to leave it
+                                : destinations[index - 1].leaveDate // if not the first stop, code lookjs at the previous stop to check when u are scheduled to leave it
                                   ? addOneDay(
-                                      destinations[index - 1].leavingDate,
+                                      destinations[index - 1].leaveDate,
                                     )
                                   : getToday()
                             }
                             disabled={
-                              index > 0 && !destinations[index - 1].leavingDate
+                              index > 0 && !destinations[index - 1].leaveDate
                             } // doesnt let users check for stop 3 or 2 unless they have filled out stop 1 
                             onChange={(e) =>
                               updateDestinationDate(
@@ -359,13 +508,13 @@ export default function CreateTrips() {
                           <label>Leaving</label>
                           <input
                             type="date"
-                            value={dest.leavingDate}
+                            value={dest.leaveDate}
                             min={dest.arrivalDate || getToday()}
                               disabled={!dest.arrivalDate}
                             onChange={(e) =>
                               updateDestinationDate(
                                 index,
-                                "leavingDate",
+                                "leaveDate",
                                 e.target.value,
                               )
                             }

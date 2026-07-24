@@ -669,3 +669,375 @@
   text-align: center;
 }
 
+.trip-card {
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.trip-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.trip-card:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 3px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.85fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.trips-column,
+.dashboard-sidebar {
+  min-width: 0;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.section-heading h2 {
+  margin: 0 0 4px;
+  color: #202033;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.section-heading p {
+  margin: 0;
+  color: #92929d;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.section-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #5047db;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.home-trip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.home-trip-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 18px 20px;
+  border: 1px solid #e6e6ef;
+  border-radius: 14px;
+  background: #ffffff;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.home-trip-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbc9f5;
+  box-shadow: 0 10px 26px rgba(38, 37, 74, 0.08);
+}
+
+.home-trip-card:focus-visible {
+  outline: 2px solid #5047db;
+  outline-offset: 3px;
+}
+
+.trip-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  background: #efefff;
+  color: #5047db;
+  font-size: 18px;
+}
+
+.home-trip-info {
+  min-width: 0;
+}
+
+.home-trip-info h3 {
+  margin: 0 0 7px;
+  overflow: hidden;
+  color: #202033;
+  font-size: 16px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-trip-info p {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: #7e7e89;
+  font-size: 13px;
+}
+
+.home-trip-info p svg {
+  flex-shrink: 0;
+  color: #5047db;
+}
+
+.trip-status {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #efefff;
+  color: #5047db;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.trip-status.completed {
+  background: #eaf8ef;
+  color: #188754;
+}
+
+.trip-status.in-progress {
+  background: #fff3df;
+  color: #b56c00;
+}
+
+.trip-status.upcoming {
+  background: #e9f3ff;
+  color: #276bb0;
+}
+
+.empty-trips-card {
+  display: flex;
+  min-height: 220px;
+  padding: 30px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 1px dashed #d8d8e5;
+  border-radius: 14px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.empty-trips-card > svg {
+  margin-bottom: 14px;
+  color: #5047db;
+  font-size: 28px;
+}
+
+.empty-trips-card h3 {
+  margin: 0 0 7px;
+  color: #202033;
+  font-size: 17px;
+}
+
+.empty-trips-card p {
+  margin: 0 0 18px;
+  color: #858590;
+  font-size: 14px;
+}
+
+.empty-trips-card button {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: #5047db;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-card {
+  border: 1px solid #e6e6ef;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.checklist-card {
+  padding: 20px;
+}
+
+.checklist-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 11px;
+  font-size: 13px;
+}
+
+.checklist-summary span {
+  color: #797984;
+}
+
+.checklist-summary strong {
+  color: #202033;
+  font-weight: 600;
+}
+
+.progress-track {
+  height: 7px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border-radius: 999px;
+  background: #ececf3;
+}
+
+.progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #5047db;
+}
+
+.checklist-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.checklist-item {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 11px;
+  border-bottom: 1px solid #eeeeF4;
+}
+
+.checklist-item:last-child {
+  border-bottom: 0;
+}
+
+.checklist-box {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid #cfcfda;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 10px;
+}
+
+.checklist-box.done {
+  border-color: #5047db;
+  background: #5047db;
+}
+
+.checklist-item p {
+  margin: 0;
+  color: #4f4f59;
+  font-size: 13px;
+}
+
+.checklist-item p.done {
+  color: #9a9aa3;
+  text-decoration: line-through;
+}
+
+.tips-heading {
+  margin-top: 28px;
+}
+
+.travel-tips-card {
+  padding: 8px 20px;
+}
+
+.travel-tip {
+  display: flex;
+  gap: 13px;
+  padding: 17px 0;
+  border-bottom: 1px solid #eeeeF4;
+}
+
+.travel-tip:last-child {
+  border-bottom: 0;
+}
+
+.tip-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 9px;
+  background: #efefff;
+  color: #5047db;
+  font-size: 14px;
+}
+
+.travel-tip div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.travel-tip strong {
+  color: #202033;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.travel-tip small {
+  color: #83838e;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+@media (max-width: 950px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .section-heading {
+    align-items: flex-start;
+  }
+
+  .home-trip-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .trip-status {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
