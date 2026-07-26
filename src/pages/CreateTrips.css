@@ -1,0 +1,417 @@
+.create-trip-page {
+  min-height: 100vh;
+  background: #eeeef5;
+}
+
+.create-trip-navbar {
+  height: 64px;
+  background: white;
+  border-bottom: 1px solid #e0e0ee;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.create-trip-left,
+.create-trip-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-btn,
+.notification-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #777;
+}
+
+.navbar-logo-text h2 {
+  margin: 0;
+  color: #3b3dbd;
+  font-size: 1.2rem;
+}
+
+.navbar-logo-text span {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #ededf8;
+  color: #3b3dbd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.create-trip-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.wizard-header h1 {
+  margin-bottom: 1.25rem;
+  color: #1a1a2e;
+}
+
+.steps-track {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.step {
+  border: 1.5px solid #e0e0ee;
+  background: white;
+  color: #999;
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.step.active {
+  background: #ededf8;
+  color: #3b3dbd;
+  border-color: #3b3dbd;
+}
+
+.step.done {
+  background: #3b3dbd;
+  color: white;
+  border-color: #3b3dbd;
+}
+
+.create-trip-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.trip-form-card,
+.trip-summary-card {
+  background: white;
+  border: 1px solid #e8e8f4;
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.trip-form-card h2 {
+  margin: 0 0 0.25rem;
+  color: #1a1a2e;
+}
+
+.trip-form-card p {
+  color: #999;
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.trip-form-card label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  margin: 1rem 0 0.4rem;
+}
+
+.trip-form-card input,
+.trip-form-card select,
+.trip-form-card textarea {
+  width: 100%;
+  border: 1.5px solid #e0e0ee;
+  background: #f7f7fb;
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+}
+
+
+.trip-form-card textarea:focus {
+ 
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.destination-card {
+  background: #f7f7fb;
+  border: 1.5px solid #e0e0ee;
+  border-radius: 14px;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.destination-card-head,
+.section-subhead,
+.step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+ 
+}
+
+.destination-card-head button,
+.section-subhead button {
+  border: none;
+  background: transparent;
+  color: #3b3dbd;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+
+}
+
+.two-column,
+.budget-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.inline-input {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.inline-input button,
+.primary-btn {
+  border: none;
+  background: #3b3dbd;
+  color: white;
+  border-radius: 10px;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.ghost-btn {
+  border: none;
+  background: #ededf8;
+  color: #3b3dbd;
+  border-radius: 10px;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary-btn.success {
+  background: #1a9e6e;
+}
+
+.step-actions {
+  margin-top: 1rem;
+}
+
+.step-actions.right {
+  justify-content: flex-end;
+}
+
+.traveler-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.traveler-chip {
+  background: #ededf8;
+  color: #3b3dbd;
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.budget-status {
+  margin-top: 1rem;
+  font-weight: 600;
+  color: #1a9e6e;
+}
+
+.budget-status.over {
+  color: #e55;
+}
+
+.trip-summary-card {
+  position: sticky;
+  top: 90px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.summary-hero {
+  background: #3b3dbd;
+  color: white;
+  padding: 1.5rem;
+}
+
+.summary-hero span {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.summary-hero h2 {
+  margin: 0.5rem 0;
+}
+
+.summary-hero p {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.85rem;
+}
+
+.summary-body {
+  padding: 1.25rem;
+}
+
+.summary-body div {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f6;
+}
+
+.summary-body div:last-child {
+  border-bottom: none;
+}
+
+.summary-body small {
+  color: #999;
+}
+
+.summary-body strong {
+  color: #1a1a2e;
+}
+
+.empty-text {
+  color: #aaa;
+  font-size: 0.85rem;
+}
+ .trip-summary-card {
+    position: static;
+  }
+
+  .steps-track {
+    flex-wrap: wrap;
+  }
+
+
+  .add-stop-icon {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: #3b3dbd;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  
+  .form-label {
+    font-size: 25px;
+    font-weight: 800;
+    color: #1f2937;
+    display: block;
+    margin-bottom: 25px;
+  }
+
+  .destination-delete {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.destination-delete button {
+  border: none;
+  background: transparent;
+  color: #3b3dbd;
+  cursor: pointer;
+}
+
+.location-autocomplete {
+  position: relative;
+}
+
+.location-suggestion-list {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+
+  background: white;
+  border: 1px solid #e0e0ee;
+  border-radius: 10px;
+  overflow: hidden;
+
+  box-shadow: 0 10px 25px
+    rgba(30, 30, 70, 0.15);
+}
+
+.location-suggestion-item {
+  display: block;
+  width: 100%;
+  padding: 12px;
+
+  border: none;
+  border-bottom: 1px solid #f0f0f6;
+  background: white;
+
+  color: #1a1a2e;
+  text-align: left;
+  cursor: pointer;
+}
+
+.location-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.location-suggestion-item:hover {
+  background: #f7f7fb;
+}
+
+.location-search-message {
+  padding: 8px 2px;
+  color: #999;
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .create-trip-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trip-summary-card {
+    position: static;
+  }
+
+  .steps-track {
+    flex-wrap: wrap;
+  }
+}
+
+ 
+

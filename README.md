@@ -102,3 +102,62 @@ export default defineConfig([
 - Padding: The internal breathing room surrounding the content.
 - Border: The line wrapping around the padding and content.
 - Margin: The empty space outside the border used to separate the element from other elements.
+
+### How does location api work?
+- User types
+
+      
+
+- handleLocationSearch()
+
+
+
+- Update textbox
+
+
+
+- Wait 350ms
+
+
+
+- Call backend
+
+
+
+- Backend calls Google
+
+ 
+
+- Suggestions returned
+
+  
+
+- React stores suggestions
+
+
+
+- Dropdown appears
+
+
+
+- User clicks one
+
+
+
+- Call Place Details endpoint
+
+
+
+- Backend calls Google
+
+
+
+- Coordinates returned
+
+   
+
+- Destination updated
+
+
+
+- Trip saved normally

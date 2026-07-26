@@ -1,18 +1,22 @@
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
 import { Routes, Route } from "react-router-dom";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Verify from "./pages/verify";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import Profile from "./pages/Profile"; 
-import Home from './pages/Home';
-import ProtectedRoute from './pages/ProtectedRoute';
+import Profile from "./pages/Profile";
+import Home from "./pages/Home";
+import ProtectedRoute from "./pages/ProtectedRoute";
+import CreateTrips from "./pages/CreateTrips";
+import TripDetail from "./pages/TripDetail";
+import AppLayout from "./components/appLayout";
 
 function App() {
   return (
     <>
       <Toaster position="top-right" />
+
       <Routes>
         <Route path="/" element={<Signup />} />
         <Route path="/signup" element={<Signup />} />
@@ -21,11 +25,14 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route element={<ProtectedRoute />}>
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/home" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/home" element={<Home />} />
+          <Route element={<AppLayout />}>
+            <Route path="/create-trip" element={<CreateTrips />} />
+         <Route path="/trip-detail/:tripId" element={<TripDetail />} />
+            
+          </Route>
         </Route>
-        
-        
       </Routes>
     </>
   );

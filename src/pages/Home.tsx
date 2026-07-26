@@ -16,13 +16,11 @@ import {
   FaShareAlt,
   FaShieldAlt,
   FaTimes,
-  FaSignOutAlt
+  FaSignOutAlt,
 } from "react-icons/fa";
-import {
-  updateProfile,
-  type CreateProfileRequest,
-} from "../api/profileAPI";
+import { updateProfile, type CreateProfileRequest } from "../api/profileAPI";
 import "./Home.css";
+import { getTripsByProfileId, type Trip } from "../api/tripsAPI";
 
 const emptyProfile: CreateProfileRequest = {
   cognitoSub: "",
@@ -62,52 +60,78 @@ export default function Home() {
   const [isEditingProfile, setIsEditingProfile] = useState(false); // controls view mode vs edit mode
   const [isSavingProfile, setIsSavingProfile] = useState(false); // controls save button loading state
   const [profile, setProfile] = useState<CreateProfileRequest>(emptyProfile); // stores profile data
+  const [trips, setTrips] = useState<Trip[]>([]);
+  //previously the trips of array did not excist inside the use state so it didnt know what was inside the array bnut now it does
   const navigate = useNavigate();
 
   const handleSignOut = () => {
-    
     localStorage.removeItem("accessToken");
     localStorage.removeItem("idToken");
 
     navigate("/login");
   };
 
-  useEffect(() => {
-    // loads the logged-in user's saved profile when the homepage opens
-    const loadProfile = async () => {
-      const idToken = localStorage.getItem("idToken");
-      const accessToken = localStorage.getItem("accessToken");
-      const profileString = localStorage.getItem("profile")
-      const profile = profileString ? JSON.parse(profileString) : null;
+  const handleCreateTrip = () => {
+    navigate("/create-trip");
+  };
+   
+ useEffect(() => {
+  const loadHomeData = async () => {
+    const accessToken = localStorage.getItem("accessToken");
+    const profileString = localStorage.getItem("profile");
 
-      if (!idToken || !accessToken) {
+    if (!accessToken) {
+      toast.error("Please log in again.");
+      navigate("/login");
+      return;
+    }
+
+    if (!profileString) {
+      toast.error("Your profile could not be found.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const existingProfile = JSON.parse(profileString);
+
+      setProfile({
+        cognitoSub: existingProfile.cognitoSub,
+        profileId: existingProfile.profileId,
+        email: existingProfile.email,
+        firstName: existingProfile.firstName ?? "",
+        lastName: existingProfile.lastName ?? "",
+        gender: existingProfile.gender ?? "",
+        dateOfBirth: existingProfile.dateOfBirth ?? "",
+        state: existingProfile.state ?? "",
+        city: existingProfile.city ?? "",
+        travelStyle: existingProfile.travelStyle ?? [],
+        preferences: existingProfile.preferences ?? [],
+      });
+
+      if (!existingProfile.profileId) {
+        console.error("Stored profile does not contain a profileId.");
+        toast.error("Your profile is incomplete.");
+        setTrips([]);
         return;
       }
 
-      try {
-        const existingProfile = profile
+      const loadedTrips = await getTripsByProfileId(
+        existingProfile.profileId,
+        accessToken,
+      );
 
-        setProfile({
-          cognitoSub: existingProfile.cognitoSub,
-          profileId: existingProfile.profileId,
-          email: existingProfile.email,
-          firstName: existingProfile.firstName ?? "",
-          lastName: existingProfile.lastName ?? "",
-          gender: existingProfile.gender ?? "",
-          dateOfBirth: existingProfile.dateOfBirth ?? "",
-          state: existingProfile.state ?? "",
-          city: existingProfile.city ?? "",
-          travelStyle: existingProfile.travelStyle ?? [],
-          preferences: existingProfile.preferences ?? [],
-        });
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to load profile");
-      }
-    };
+      setTrips(loadedTrips);
+    } catch (error) {
+      console.error("Failed to load home data:", error);
+      toast.error("Failed to load your profile or trips.");
+    }
+  };
 
-    loadProfile();
-  }, []);
+  void loadHomeData();
+}, [navigate]);
+
+ 
 
   const openProfile = () => {
     // opens the profile panel in view mode
@@ -213,16 +237,14 @@ export default function Home() {
             <a href="#">
               <FaCalendarAlt /> Calendar
             </a>
-             <a href="#" onClick={handleSignOut} >
-              <FaSignOutAlt/> Sign Out
-              <button type="button" className="signout-btn">
-          </button>
+            <a href="#" onClick={handleSignOut}>
+              <FaSignOutAlt /> Sign Out
+              <button type="button" className="signout-btn"></button>
             </a>
           </nav>
         </div>
 
         <div className="navbar-profile">
-
           <button
             className="avatar"
             onClick={openProfile}
@@ -284,9 +306,7 @@ export default function Home() {
                     onClick={() => setIsEditingProfile(!isEditingProfile)}
                   >
                     {isEditingProfile ? (
-                      <>
-                     
-                      </>
+                      <></>
                     ) : (
                       <>
                         <FaPen /> Edit
@@ -486,9 +506,6 @@ export default function Home() {
               Your next adventure to Cancún is in 18 days. Keep planning or
               start something new.
             </p>
-            <button className="new-trip-btn">
-              <FaPlus /> New trip plan
-            </button>
           </div>
 
           <div className="hero-stats">
@@ -512,13 +529,17 @@ export default function Home() {
 
       <div className="home-content">
         <section className="quick-actions">
-          <button className="action-card">
+          <button className="action-card" onClick={handleCreateTrip}>
             <span>
               <FaPlus />
             </span>
+
             <strong>Create trip</strong>
+
             <small>Plan a new vacation from scratch</small>
           </button>
+
+          
 
           <button className="action-card">
             <span>
@@ -545,117 +566,189 @@ export default function Home() {
           </button>
         </section>
 
-        <section className="dashboard-grid">
-          <div>
-            <div className="section-heading">
-              <h2>Your trips</h2>
-              <a href="#">See all →</a>
-            </div>
+       <section className="dashboard-grid">
+  <div className="trips-column">
+    <div className="section-heading">
+      <div>
+        <h2>Your trips</h2>
+        <p>Continue planning your upcoming adventures</p>
+      </div>
 
-            {[
-              [
-                "Cancún, Mexico",
-                "Jun 19 – Jun 26, 2026 · 7 nights",
-                "Upcoming",
-              ],
-              [
-                "New York City, USA",
-                "Aug 4 – Aug 8, 2026 · 4 nights",
-                "Planning",
-              ],
-              ["Banff, Canada", "Sep 12 – Sep 18, 2026 · 6 nights", "Planning"],
-            ].map(([name, dates, status]) => (
-              <article className="trip-card" key={name}>
-                <span className="trip-icon">
-                  <FaPlane />
-                </span>
+      <button
+        type="button"
+        className="section-link"
+        onClick={() => navigate("/trips")}
+      >
+        See all →
+      </button>
+    </div>
+   
+    {trips.length === 0 ? (
+      <div className="empty-trips-card">
+        <FaPlane />
+        <h3>No trips yet</h3>
+        <p>Create your first trip to start planning.</p>
 
-                <div>
-                  <h3>{name}</h3>
-                  <p>
-                    <FaCalendarAlt /> {dates}
-                  </p>
-                </div>
+        <button
+          type="button"
+          onClick={() => navigate("/create-trip")}
+        >
+          Create a trip
+        </button>
+      </div>
+    ) : (
+      <div className="home-trip-list">
+        {trips.map((trip) => {
+            console.log("Full trip object:", trip);
+  console.log("Trip ID value:", trip.tripId);
+          const firstDestination = trip.destination?.[0];
+          const status = trip.status || "PLANNING";
 
-                <em className={status.toLowerCase()}>{status}</em>
-              </article>
-            ))}
-          </div>
+          return (
+            <article
+              className="home-trip-card"
+              key={trip.tripId}
+              role="button"
+              tabIndex={0}
+             onClick={() => {
+ 
+  navigate(`/trip-detail/${trip.tripId}`);
+}}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  navigate(`/trip-detail/:${trip.tripId}`);
+                }
+              }}
+            >
+              <span className="trip-icon">
+                <FaPlane />
+              </span>
 
-          <div>
-            <div className="section-heading">
-              <h2>Trip checklist</h2>
-              <a href="#">Cancún</a>
-            </div>
+              <div className="home-trip-info">
+                <h3>{trip.tripName}</h3>
 
-            <div className="sidebar-card">
-              <div className="progress-track">
-                <span />
-              </div>
-
-              <small>3 of 5 tasks done</small>
-
-              {[
-                "Book flights",
-                "Reserve hotel",
-                "Travel insurance",
-                "Plan activities",
-                "Currency & spending money",
-              ].map((task, index) => (
-                <div className="checklist-item" key={task}>
-                  <span className={index < 3 ? "done" : ""}>
-                    {index < 3 && <FaCheck />}
+                <p>
+                  <FaCalendarAlt />
+                  <span>
+                    {firstDestination?.name || "No destination"}
                   </span>
-                  <p className={index < 3 ? "done" : ""}>{task}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="section-heading tips-heading">
-              <h2>Travel tips</h2>
-            </div>
-
-            <div className="sidebar-card travel-tips-card">
-              <div>
-                <span>
-                  <FaCompass />
-                </span>
-                <p>
-                  <strong>Best time to visit Cancún</strong>
-                  <small>
-                    Dec-April is peak season. June can be warm with occasional
-                    rain.
-                  </small>
                 </p>
               </div>
 
-              <div>
-                <span>
-                  <FaDollarSign />
-                </span>
-                <p>
-                  <strong>Currency</strong>
-                  <small>
-                    Mexican Peso (MXN). USD is widely accepted in tourist areas.
-                  </small>
-                </p>
-              </div>
+              <em
+                className={`trip-status ${status
+                  .toLowerCase()
+                  .replaceAll("_", "-")}`}
+              >
+                {status.replaceAll("_", " ")}
+              </em>
+            </article>
+          );
+        })}
+      </div>
+    )}
+  </div>
 
-              <div>
-                <span>
-                  <FaShieldAlt />
-                </span>
-                <p>
-                  <strong>Visa requirements</strong>
-                  <small>
-                    US citizens don't need a visa. Tourist card issued on
-                    arrival.
-                  </small>
-                </p>
-              </div>
+  <aside className="dashboard-sidebar">
+    <div className="section-heading">
+      <div>
+        <h2>Trip checklist</h2>
+        <p>Stay on top of your travel tasks</p>
+      </div>
+    </div>
+
+    <div className="sidebar-card checklist-card">
+      <div className="checklist-summary">
+        <span>Trip preparation</span>
+        <strong>3 of 5 complete</strong>
+      </div>
+
+      <div className="progress-track">
+        <span style={{ width: "60%" }} />
+      </div>
+
+      <div className="checklist-items">
+        {[
+          "Book flights",
+          "Reserve hotel",
+          "Travel insurance",
+          "Plan activities",
+          "Currency & spending money",
+        ].map((task, index) => {
+          const completed = index < 3;
+
+          return (
+            <div className="checklist-item" key={task}>
+              <span
+                className={`checklist-box ${
+                  completed ? "done" : ""
+                }`}
+              >
+                {completed && <FaCheck />}
+              </span>
+
+              <p className={completed ? "done" : ""}>
+                {task}
+              </p>
             </div>
-          </div>
-        </section>
+          );
+        })}
+      </div>
+    </div>
+
+    <div className="section-heading tips-heading">
+      <div>
+        <h2>Travel tips</h2>
+        <p>Helpful information for your destination</p>
+      </div>
+    </div>
+
+    <div className="sidebar-card travel-tips-card">
+      <div className="travel-tip">
+        <span className="tip-icon">
+          <FaCompass />
+        </span>
+
+        <div>
+          <strong>Best time to visit Cancún</strong>
+          <small>
+            December through April is peak season. June is
+            warmer with occasional rain.
+          </small>
+        </div>
+      </div>
+
+      <div className="travel-tip">
+        <span className="tip-icon">
+          <FaDollarSign />
+        </span>
+
+        <div>
+          <strong>Currency</strong>
+          <small>
+            The local currency is the Mexican Peso. US dollars
+            are widely accepted in tourist areas.
+          </small>
+        </div>
+      </div>
+
+      <div className="travel-tip">
+        <span className="tip-icon">
+          <FaShieldAlt />
+        </span>
+
+        <div>
+          <strong>Visa requirements</strong>
+          <small>
+            US citizens generally do not need a visa for short
+            tourist stays.
+          </small>
+        </div>
+      </div>
+    </div>
+  </aside>
+</section>
       </div>
     </main>
   );

@@ -37,7 +37,8 @@ const Login = () => {
 
       try {
         // try catch bc getprofile is an async api call and it returns a promise not the actual profile , its not just a true false thing
-        const profile = await getProfile(email, data.accessToken); // checks if the user has a profile
+        const profile = await getProfile(email, data.accessToken); 
+      
         if (profile) {
           localStorage.setItem("profile", JSON.stringify(profile))
         }
