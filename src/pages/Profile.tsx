@@ -103,7 +103,8 @@ export default function Profile() {
         email: decodedCurrentIdToken.email ?? form.email, // always use email from token first
       };
 
-      const createdProfile = await createProfile( //Saved the profile returned by the backend after profile creation.
+      const createdProfile = await createProfile(
+        //Saved the profile returned by the backend after profile creation.
         profileData,
         currentAccessToken,
       ); // sends POST /profile with Authorization Bearer accessToken
@@ -152,9 +153,15 @@ export default function Profile() {
 
             <input
               name="dateOfBirth"
+              type={form.dateOfBirth ? "date" : "text"}
               placeholder="Date of birth"
               value={form.dateOfBirth}
               onChange={handleChange}
+              onFocus={(e) => (e.target.type = "date")}
+              onBlur={(e) => {
+                if (!e.target.value) e.target.type = "text";
+              }}
+                /* max={new Date().toISOString().split("T")[0]} */
             />
 
             <select name="gender" value={form.gender} onChange={handleChange}>

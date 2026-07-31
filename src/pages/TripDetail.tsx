@@ -393,6 +393,7 @@ const currencySymbol = getCurrencySymbol(budget.currency);
 
   return (
     <div className="trip-detail-page">
+      
       <section className="trip-hero">
         <div className="trip-hero-inner">
           <div className="trip-hero-top">
@@ -507,13 +508,14 @@ const currencySymbol = getCurrencySymbol(budget.currency);
 
       <main className="trip-content-layout">
         <section className="trip-main-column">
-          <article className="trip-card">
+          <article className="trip-card itinerary-card">
             <div className="card-heading">
               <div>
                 <h2>Itinerary</h2>
                 <p>Where you are headed and when</p>
               </div>
             </div>
+            <div className="itinerary-list"></div>
 
             {shownTrip.destination.map((destination, index) => {
               const previousLeavingDate =
@@ -528,6 +530,7 @@ const currencySymbol = getCurrencySymbol(budget.currency);
               return editing ? (
                 <div className="editable-stop" key={index}>
                   <div className="stop-number">{index + 1}</div>
+                  
                   <div className="editable-stop-main">
                     <input
                       className="destination-input"
@@ -583,7 +586,7 @@ const currencySymbol = getCurrencySymbol(budget.currency);
               ) : (
                 <div className="itinerary-row" key={index}>
                   <div className="stop-number">{index + 1}</div>
-                  <div>
+                  <div className="stop-details">
                     <div className="stop-name">
                       {destination.name || "Unnamed destination"}
                     </div>
@@ -594,8 +597,9 @@ const currencySymbol = getCurrencySymbol(budget.currency);
                   </div>
                 </div>
               );
+              
             })}
-
+           
             {editing && (
               <button className="add-stop" onClick={addDestination}>
                 <FaPlus /> Add another stop
@@ -606,7 +610,7 @@ const currencySymbol = getCurrencySymbol(budget.currency);
          <article className="trip-card budget-card">
   <div className="budget-card-heading">
     <h2>Budget</h2>
-    <p>Total for the whole trip across all travelers</p>
+    <p>Total budget for your trip</p>
   </div>
 
   {editing ? (

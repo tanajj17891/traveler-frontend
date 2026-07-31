@@ -39,8 +39,6 @@ type BudgetForm = {
 
 }; */
 
-
-
 const BUDGET_CATEGORIES = [
   "flights",
   "accommodation",
@@ -82,15 +80,15 @@ export default function CreateTrips() {
     { ...EMPTY_DESTINATION },
   ]);
 
-const [locationSuggestions, setLocationSuggestions] = useState<
-  Record<number, LocationSuggestion[]>
->({});
+  const [locationSuggestions, setLocationSuggestions] = useState<
+    Record<number, LocationSuggestion[]>
+  >({});
 
-const [searchingLocation, setSearchingLocation] = useState<
-  Record<number, boolean>
->({});
+  const [searchingLocation, setSearchingLocation] = useState<
+    Record<number, boolean>
+  >({});
 
-const searchTimers = useRef<Record<number, number>>({}); //keeps track of all active timers 
+  const searchTimers = useRef<Record<number, number>>({}); //keeps track of all active timers
   const [budget, setBudget] = useState<BudgetForm>({
     currency: "USD",
     total: "",
@@ -116,8 +114,6 @@ const searchTimers = useRef<Record<number, number>>({}); //keeps track of all ac
     ); /* The filter line looks at my list, 
     finds the exact row number i clicked on (index), and throws it in the trash. It then keeps all the other rows exactly the same. */
   };
-
- 
 
   const updateDestinationDate = (
     // Updates either the arrival or leaving date for a specific destination by its index.
@@ -179,7 +175,6 @@ const searchTimers = useRef<Record<number, number>>({}); //keeps track of all ac
     const accessToken = localStorage.getItem("accessToken");
     const savedProfile = localStorage.getItem("profile");
     const profileId = savedProfile ? JSON.parse(savedProfile).profileId : null;
- 
 
     if (!accessToken) {
       alert("Access token is missing.");
@@ -212,7 +207,7 @@ const searchTimers = useRef<Record<number, number>>({}); //keeps track of all ac
 
     try {
       setIsCreating(true);
-   
+
       await createTrip(payload, accessToken);
       alert("Trip created successfully!");
       navigate("/home");
@@ -254,40 +249,45 @@ const searchTimers = useRef<Record<number, number>>({}); //keeps track of all ac
     { n: 4, label: "Notes", icon: <FaStickyNote /> },
   ] as const;
 
-  const handleLocationSearch = ( //when user starts to type this function gets called 
-  index: number, //figures out which destination 
-  value: string,
-) => {
-  // Update what appears inside the input.
-  setDestinations((current) => //gets the current array and helps create a brand new one 
-    current.map((destination, destinationIndex) =>
-      destinationIndex === index
-        ? { //Creates a new destrination object 
-            ...destination, //copies the old properties so we dont lose starting and arrival date 
-            name: value,
-            latitude: 0, // we reset the coordinates once the user starts typing again bc we dont know what location they mean 
-            longitude: 0,
-          }
-        : destination,
-    ),
-  );
+  const handleLocationSearch = (
+    //when user starts to type this function gets called
+    index: number, //figures out which destination
+    value: string,
+  ) => {
+    // Update what appears inside the input.
+    setDestinations(
+      (
+        current, //gets the current array and helps create a brand new one
+      ) =>
+        current.map((destination, destinationIndex) =>
+          destinationIndex === index
+            ? {
+                //Creates a new destrination object
+                ...destination, //copies the old properties so we dont lose starting and arrival date
+                name: value,
+                latitude: 0, // we reset the coordinates once the user starts typing again bc we dont know what location they mean
+                longitude: 0,
+              }
+            : destination,
+        ),
+    );
 
-  // Cancel the previous timer for this stop.
-  window.clearTimeout(searchTimers.current[index]); //cancels pending api requests as the user is typong , also known as debouncing , when the user stops typoing for 350 ms thats when the api gets called 
+    // Cancel the previous timer for this stop.
+    window.clearTimeout(searchTimers.current[index]); //cancels pending api requests as the user is typong , also known as debouncing , when the user stops typoing for 350 ms thats when the api gets called
 
-  if (value.trim().length < 3) { // doesnt show suggestions if user has typed less than 3 characters 
-    setLocationSuggestions((current) => ({
-      ...current,
-      [index]: [],
-    }));
+    if (value.trim().length < 3) {
+      // doesnt show suggestions if user has typed less than 3 characters
+      setLocationSuggestions((current) => ({
+        ...current,
+        [index]: [],
+      }));
 
-    return;
-  }
+      return;
+    }
 
-  searchTimers.current[index] = window.setTimeout(
-    async () => { // function will run after 200 ms
-      const accessToken =
-        localStorage.getItem("accessToken");
+    searchTimers.current[index] = window.setTimeout(async () => {
+      // function will run after 200 ms
+      const accessToken = localStorage.getItem("accessToken");
 
       if (!accessToken) return;
 
@@ -297,21 +297,18 @@ const searchTimers = useRef<Record<number, number>>({}); //keeps track of all ac
           [index]: true,
         }));
 
-        const suggestions =
-          await getLocationSuggestions( // where frontend calls my backend 
-            value.trim(),
-            accessToken,
-          );
+        const suggestions = await getLocationSuggestions(
+          // where frontend calls my backend
+          value.trim(),
+          accessToken,
+        );
 
         setLocationSuggestions((current) => ({
           ...current,
           [index]: suggestions,
         }));
       } catch (error) {
-        console.error(
-          "Failed to load location suggestions:",
-          error,
-        );
+        console.error("Failed to load location suggestions:", error);
 
         setLocationSuggestions((current) => ({
           ...current,
@@ -323,64 +320,57 @@ const searchTimers = useRef<Record<number, number>>({}); //keeps track of all ac
           [index]: false,
         }));
       }
-    },
-    200,
-  );
-};
+    }, 200);
+  };
 
-const selectLocation = async ( // runs after user selects a suggestion from the dropdown 
-  index: number,
-  suggestion: LocationSuggestion,
-) => {
-  const accessToken =
-    localStorage.getItem("accessToken");
+  const selectLocation = async (
+    // runs after user selects a suggestion from the dropdown
+    index: number,
+    suggestion: LocationSuggestion,
+  ) => {
+    const accessToken = localStorage.getItem("accessToken");
 
-  if (!accessToken) {
-    alert("Please log in again.");
-    return;
-  }
+    if (!accessToken) {
+      alert("Please log in again.");
+      return;
+    }
 
-  try {
-    const place = await getPlaceDetails(
-      suggestion.placeId, //what i got back from my autocomplete api 
-      accessToken,
-    );
+    try {
+      const place = await getPlaceDetails(
+        suggestion.placeId, //what i got back from my autocomplete api
+        accessToken,
+      );
 
-    setDestinations((current) =>
-      current.map((destination, destinationIndex) =>
-        destinationIndex === index
-          ? {
-              ...destination,
+      setDestinations((current) =>
+        current.map((destination, destinationIndex) =>
+          destinationIndex === index
+            ? {
+                ...destination,
 
-              // Keep arrivalDate and leavingDate from
-              // the existing destination.
-              name:
-                place.displayName?.text ||
-                suggestion.name ||
-                place.formattedAddress ||
-                "",
+                // Keep arrivalDate and leavingDate from
+                // the existing destination.
+                name:
+                  place.displayName?.text ||
+                  suggestion.name ||
+                  place.formattedAddress ||
+                  "",
 
-              latitude:
-                place.location?.latitude ?? 0,
+                latitude: place.location?.latitude ?? 0,
 
-              longitude:
-                place.location?.longitude ?? 0,
-            }
-          : destination,
-      ),
-    );
+                longitude: place.location?.longitude ?? 0,
+              }
+            : destination,
+        ),
+      );
 
-    setLocationSuggestions((current) => ({
-      ...current,
-      [index]: [],
-    }));
-  } catch (error) {
-    console.error(
-      "Failed to load place details:",
-      error,
-    );
-  }
-};
+      setLocationSuggestions((current) => ({
+        ...current,
+        [index]: [],
+      }));
+    } catch (error) {
+      console.error("Failed to load place details:", error);
+    }
+  };
 
   return (
     <main className="create-trip-page">
@@ -418,11 +408,13 @@ const selectLocation = async ( // runs after user selects a suggestion from the 
                   />
 
                   <div className="section-subhead">
-                    <label className="form-label">Destinations</label>
+                    <span className="form-label">Destinations</span>
+
                     <button
                       type="button"
                       className="add-stop-icon"
                       onClick={addDestination}
+                      aria-label="Add destination"
                     >
                       <FaPlus />
                     </button>
@@ -436,46 +428,40 @@ const selectLocation = async ( // runs after user selects a suggestion from the 
 
                       <label>Destination</label>
 
-                     <div className="location-autocomplete">
-  <input
-    type="text"
-    value={dest.name}
-    placeholder="Search for a destination"
-    autoComplete="off"
-    onChange={(event) =>
-      handleLocationSearch(
-        index,
-        event.target.value,
-      )
-    }
-  />
+                      <div className="location-autocomplete">
+                        <input
+                          type="text"
+                          value={dest.name}
+                          placeholder="Search for a destination"
+                          autoComplete="off"
+                          onChange={(event) =>
+                            handleLocationSearch(index, event.target.value)
+                          }
+                        />
 
-  {searchingLocation[index] && (
-    <div className="location-search-message">
-      Searching...
-    </div>
-  )}
+                        {searchingLocation[index] && (
+                          <div className="location-search-message">
+                            Searching...
+                          </div>
+                        )}
 
-  {(locationSuggestions[index]?.length ?? 0) >
-    0 && (
-    <div className="location-suggestion-list">
-      {locationSuggestions[index].map(
-        (suggestion) => (
-          <button
-            type="button"
-            className="location-suggestion-item"
-            key={suggestion.placeId}
-            onClick={() =>
-              selectLocation(index, suggestion)
-            }
-          >
-            {suggestion.name}
-          </button>
-        ),
-      )}
-    </div>
-  )}
-</div>
+                        {(locationSuggestions[index]?.length ?? 0) > 0 && (
+                          <div className="location-suggestion-list">
+                            {locationSuggestions[index].map((suggestion) => (
+                              <button
+                                type="button"
+                                className="location-suggestion-item"
+                                key={suggestion.placeId}
+                                onClick={() =>
+                                  selectLocation(index, suggestion)
+                                }
+                              >
+                                {suggestion.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
                       <div className="two-column">
                         <div>
@@ -487,14 +473,12 @@ const selectLocation = async ( // runs after user selects a suggestion from the 
                               index === 0 // tells me which stop i am rendering
                                 ? getToday()
                                 : destinations[index - 1].leaveDate // if not the first stop, code lookjs at the previous stop to check when u are scheduled to leave it
-                                  ? addOneDay(
-                                      destinations[index - 1].leaveDate,
-                                    )
+                                  ? addOneDay(destinations[index - 1].leaveDate)
                                   : getToday()
                             }
                             disabled={
                               index > 0 && !destinations[index - 1].leaveDate
-                            } // doesnt let users check for stop 3 or 2 unless they have filled out stop 1 
+                            } // doesnt let users check for stop 3 or 2 unless they have filled out stop 1
                             onChange={(e) =>
                               updateDestinationDate(
                                 index,
@@ -510,7 +494,7 @@ const selectLocation = async ( // runs after user selects a suggestion from the 
                             type="date"
                             value={dest.leaveDate}
                             min={dest.arrivalDate || getToday()}
-                              disabled={!dest.arrivalDate}
+                            disabled={!dest.arrivalDate}
                             onChange={(e) =>
                               updateDestinationDate(
                                 index,
@@ -536,7 +520,22 @@ const selectLocation = async ( // runs after user selects a suggestion from the 
                 </div>
 
                 <div className="step-actions right">
-                  <button className="primary-btn" onClick={() => setStep(2)}>
+                  <button
+                    className="primary-btn"
+                    onClick={() => {
+                      if (tripName.trim() === "") {
+                        alert("Please enter a trip name.");
+                        return;
+                      }
+
+                      if (destinations.every((d) => d.name.trim() === "")) {
+                        alert("Please add at least one destination.");
+                        return;
+                      }
+
+                      setStep(2);
+                    }}
+                  >
                     Travelers
                   </button>
                 </div>
