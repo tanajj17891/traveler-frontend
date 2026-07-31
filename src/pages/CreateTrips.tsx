@@ -19,6 +19,7 @@ import {
   getPlaceDetails,
   type LocationSuggestion,
 } from "../api/locationAPI";
+import { createBudget } from "../api/budgetsAPI";
 import "./CreateTrips.css";
 
 type BudgetForm = {
@@ -192,15 +193,7 @@ export default function CreateTrips() {
       tripName: tripName || "New trip",
       destination: destinations,
       travelers: travelerEmails, // previously i did [traveleremails] which was creating an array of the array traveleremails hence the error of never finding that email in my backend , then i changed to this
-      budget: {
-        currency: budget.currency,
-        total: toNum(budget.total),
-        flights: toNum(budget.flights),
-        accommodation: toNum(budget.accommodation),
-        food: toNum(budget.food),
-        activities: toNum(budget.activities),
-        misc: toNum(budget.misc),
-      },
+
       notes: notes ? [notes] : [],
       status: "PLANNING",
     };
@@ -208,7 +201,20 @@ export default function CreateTrips() {
     try {
       setIsCreating(true);
 
-      await createTrip(payload, accessToken);
+      const createdTrip = await createTrip(payload, accessToken);
+      const budgetPayload = {
+        tripId: createdTrip.tripId,
+        profileId,
+        total: toNum(budget.total),
+        flights: toNum(budget.flights),
+        accommodation: toNum(budget.accommodation),
+        food: toNum(budget.food),
+        activities: toNum(budget.activities),
+        misc: toNum(budget.misc),
+      };
+
+      await createBudget(budgetPayload, accessToken);
+
       alert("Trip created successfully!");
       navigate("/home");
     } catch (error) {

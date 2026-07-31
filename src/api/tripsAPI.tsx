@@ -8,22 +8,13 @@ export type Destination = {
   leaveDate: string;
 };
 
-export type Budget = {
-  currency: string;
-  total: number;
-  flights: number;
-  accommodation: number;
-  food: number;
-  activities: number;
-  misc: number;
-};
+
 
 export type CreateTripRequest = {
   profileId: string;
   tripName: string;
   destination: Destination[];
   travelers: string[];
-  budget: Budget;
   notes: string[];
   status: "PLANNING" | "UPCOMING" | "IN_PROGRESS" | "COMPLETED";
 };
