@@ -15,7 +15,7 @@ export type CreateTripRequest = {
   tripName: string;
   destination: Destination[];
   travelers: string[];
-  notes: string[];
+
   status: "PLANNING" | "UPCOMING" | "IN_PROGRESS" | "COMPLETED";
 };
 export type Trip = CreateTripRequest & {

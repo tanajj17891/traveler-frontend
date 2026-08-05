@@ -20,6 +20,7 @@ import {
   type LocationSuggestion,
 } from "../api/locationAPI";
 import { createBudget } from "../api/budgetsAPI";
+import { createNotes } from "../api/notesAPI";
 import "./CreateTrips.css";
 
 type BudgetForm = {
@@ -30,6 +31,9 @@ type BudgetForm = {
   food: string;
   activities: string;
   misc: string;
+};
+type NotesForm = {
+  text: string;
 };
 
 /* type DestinationOption = {
@@ -100,7 +104,9 @@ export default function CreateTrips() {
     misc: "",
   });
 
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState<NotesForm>({
+    text: "",
+  });
 
   const addDestination = () => {
     // Appends a new, independent empty destination object to the state array.
@@ -193,8 +199,6 @@ export default function CreateTrips() {
       tripName: tripName || "New trip",
       destination: destinations,
       travelers: travelerEmails, // previously i did [traveleremails] which was creating an array of the array traveleremails hence the error of never finding that email in my backend , then i changed to this
-
-      notes: notes ? [notes] : [],
       status: "PLANNING",
     };
 
@@ -213,7 +217,17 @@ export default function CreateTrips() {
         misc: toNum(budget.misc),
       };
 
+      const notesPayload = {
+        tripId: createdTrip.tripId,
+        profileId,
+        text: notes.text,
+      };
+
       await createBudget(budgetPayload, accessToken);
+
+      if (notes.text.trim() !== "") {
+        await createNotes(notesPayload, accessToken);
+      }
 
       alert("Trip created successfully!");
       navigate("/home");
@@ -692,8 +706,13 @@ export default function CreateTrips() {
                     day in detail once the trip is created.
                   </p>
                   <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                    value={notes.text}
+                    onChange={(e) =>
+                      setNotes({
+                        ...notes,
+                        text: e.target.value,
+                      })
+                    }
                     placeholder="e.g. Check visa requirements, book hotel, research restaurants..."
                   />
                 </div>
