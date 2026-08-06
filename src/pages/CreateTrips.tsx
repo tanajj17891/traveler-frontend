@@ -21,6 +21,8 @@ import {
 } from "../api/locationAPI";
 import { createBudget } from "../api/budgetsAPI";
 import { createNotes } from "../api/notesAPI";
+import {createTraveler} from "../api/travelersAPI";
+import { getProfile } from "../api/profileAPI";
 import "./CreateTrips.css";
 
 type BudgetForm = {
@@ -35,6 +37,7 @@ type BudgetForm = {
 type NotesForm = {
   text: string;
 };
+
 
 /* type DestinationOption = {
 
@@ -107,6 +110,9 @@ export default function CreateTrips() {
   const [notes, setNotes] = useState<NotesForm>({
     text: "",
   });
+
+
+ 
 
   const addDestination = () => {
     // Appends a new, independent empty destination object to the state array.
@@ -198,45 +204,64 @@ export default function CreateTrips() {
       profileId,
       tripName: tripName || "New trip",
       destination: destinations,
-      travelers: travelerEmails, // previously i did [traveleremails] which was creating an array of the array traveleremails hence the error of never finding that email in my backend , then i changed to this
+      // previously i did [traveleremails] which was creating an array of the array traveleremails hence the error of never finding that email in my backend , then i changed to this
       status: "PLANNING",
     };
 
-    try {
-      setIsCreating(true);
+  try {
+  setIsCreating(true);
 
-      const createdTrip = await createTrip(payload, accessToken);
-      const budgetPayload = {
-        tripId: createdTrip.tripId,
-        profileId,
-        total: toNum(budget.total),
-        flights: toNum(budget.flights),
-        accommodation: toNum(budget.accommodation),
-        food: toNum(budget.food),
-        activities: toNum(budget.activities),
-        misc: toNum(budget.misc),
-      };
+  const createdTrip = await createTrip(payload, accessToken);
 
-      const notesPayload = {
-        tripId: createdTrip.tripId,
-        profileId,
-        text: notes.text,
-      };
+  await Promise.all(
+    travelerEmails.map(async (email) => {
+      const travelerProfile = await getProfile(
+        email,
+        accessToken,
+      );
 
-      await createBudget(budgetPayload, accessToken);
+      return createTraveler(
+        {
+          tripId: createdTrip.tripId,
+          profileId: travelerProfile.profileId,
+          email,
+        },
+        accessToken,
+      );
+    }),
+  );
 
-      if (notes.text.trim() !== "") {
-        await createNotes(notesPayload, accessToken);
-      }
+  const budgetPayload = {
+    tripId: createdTrip.tripId,
+    profileId,
+    total: toNum(budget.total),
+    flights: toNum(budget.flights),
+    accommodation: toNum(budget.accommodation),
+    food: toNum(budget.food),
+    activities: toNum(budget.activities),
+    misc: toNum(budget.misc),
+  };
 
-      alert("Trip created successfully!");
-      navigate("/home");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to create trip");
-    } finally {
-      setIsCreating(false);
-    }
+  await createBudget(budgetPayload, accessToken);
+
+  if (notes.text.trim() !== "") {
+    const notesPayload = {
+      tripId: createdTrip.tripId,
+      profileId,
+      text: notes.text.trim(),
+    };
+
+    await createNotes(notesPayload, accessToken);
+  }
+
+  alert("Trip created successfully!");
+  navigate("/home");
+} catch (error) {
+  console.error(error);
+  alert("Failed to create trip");
+} finally {
+  setIsCreating(false);
+}
   };
 
   const namedDestinations = destinations.filter((d) => d.name.trim());

@@ -14,7 +14,7 @@ export type CreateTripRequest = {
   profileId: string;
   tripName: string;
   destination: Destination[];
-  travelers: string[];
+ 
 
   status: "PLANNING" | "UPCOMING" | "IN_PROGRESS" | "COMPLETED";
 };

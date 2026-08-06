@@ -17,6 +17,7 @@ export const createNotes = async (
   noteData: CreateNotesRequest,
   token: string,
 ): Promise<NotesResponse> => {
+  console.log("NOTES PAYLOAD SENT:", noteData);
   const response = await api.post("/notes", noteData, {
     headers: {
       Authorization: `Bearer ${token}`,
