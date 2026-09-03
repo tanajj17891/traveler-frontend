@@ -13,7 +13,6 @@ export type Destination = {
 export type CreateTripRequest = {
   profileId: string;
   tripName: string;
-  destination: Destination[];
  
 
   status: "PLANNING" | "UPCOMING" | "IN_PROGRESS" | "COMPLETED";

@@ -11,10 +11,9 @@ export type PlaceDetails = {
     text?: string;
   };
   formattedAddress?: string;
-  location?: {
-    latitude?: number;
-    longitude?: number;
-  };
+
+  latitude?: number;
+  longitude?: number;
 };
 
 export const getLocationSuggestions = async (
@@ -46,8 +45,5 @@ export const getPlaceDetails = async (
     },
   });
 
-  
-  return Array.isArray(response.data)
-    ? response.data[0]
-    : response.data;
+  return Array.isArray(response.data) ? response.data[0] : response.data;
 };

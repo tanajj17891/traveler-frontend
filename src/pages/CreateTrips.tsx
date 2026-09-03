@@ -12,16 +12,19 @@ import {
 import {
   createTrip,
   type CreateTripRequest,
-  type Destination,
 } from "../api/tripsAPI";
 import {
   getLocationSuggestions,
   getPlaceDetails,
   type LocationSuggestion,
 } from "../api/locationAPI";
+import {
+  createDestination,
+  type Destination,
+} from "../api/destinationsAPI";
 import { createBudget } from "../api/budgetsAPI";
 import { createNotes } from "../api/notesAPI";
-import {createTraveler} from "../api/travelersAPI";
+import { createTraveler } from "../api/travelersAPI";
 import { getProfile } from "../api/profileAPI";
 import "./CreateTrips.css";
 
@@ -34,10 +37,10 @@ type BudgetForm = {
   activities: string;
   misc: string;
 };
+
 type NotesForm = {
   text: string;
 };
-
 
 /* type DestinationOption = {
 
@@ -84,6 +87,7 @@ export default function CreateTrips() {
   user submits the final form, preventing them from accidentally double-clicking the submit button while the API saves the data. */
 
   const [tripName, setTripName] = useState(""); //holds the trip names and other strings when user is typoing
+
   const [destinations, setDestinations] = useState<Destination[]>([
     { ...EMPTY_DESTINATION },
   ]);
@@ -97,6 +101,7 @@ export default function CreateTrips() {
   >({});
 
   const searchTimers = useRef<Record<number, number>>({}); //keeps track of all active timers
+
   const [budget, setBudget] = useState<BudgetForm>({
     currency: "USD",
     total: "",
@@ -111,17 +116,18 @@ export default function CreateTrips() {
     text: "",
   });
 
-
- 
-
   const addDestination = () => {
     // Appends a new, independent empty destination object to the state array.
-    setDestinations((prev) => [...prev, { ...EMPTY_DESTINATION }]);
+    setDestinations((prev) => [
+      ...prev,
+      { ...EMPTY_DESTINATION },
+    ]);
   };
 
   const removeDestination = (index: number) => {
     // Don't erase everything.
     if (destinations.length === 1) return;
+
     setDestinations((prev) =>
       prev.filter((_, i) => i !== index),
     ); /* The filter line looks at my list, 
@@ -137,14 +143,23 @@ export default function CreateTrips() {
     value: string,
   ) => {
     setDestinations((prev) =>
-      prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)),
+      prev.map((d, i) =>
+        i === index
+          ? {
+              ...d,
+              [field]: value,
+            }
+          : d,
+      ),
     );
   };
 
   const getToday = () => {
     const today = new Date(); // gets current time
     const offset = today.getTimezoneOffset(); //converts timezones to local time
-    const localToday = new Date(today.getTime() - offset * 60 * 1000); // does the calculation
+    const localToday = new Date(
+      today.getTime() - offset * 60 * 1000,
+    ); // does the calculation
 
     return localToday.toISOString().split("T")[0]; //seperates date from the time
   };
@@ -157,7 +172,8 @@ export default function CreateTrips() {
   };
 
   const [travelerEmail, setTravelerEmail] = useState("");
-  const [travelerEmails, setTravelerEmails] = useState<string[]>([]);
+  const [travelerEmails, setTravelerEmails] =
+    useState<string[]>([]);
 
   const addTravelerEmail = () => {
     const email = travelerEmail.trim();
@@ -169,30 +185,49 @@ export default function CreateTrips() {
   };
 
   const removeTravelerEmail = (email: string) => {
-    setTravelerEmails((prev) => prev.filter((item) => item !== email));
+    setTravelerEmails((prev) =>
+      prev.filter((item) => item !== email),
+    );
   };
 
-  const handleBudgetChange = (field: keyof BudgetForm, value: string) => {
-    setBudget((prev) => ({ ...prev, [field]: value }));
+  const handleBudgetChange = (
+    field: keyof BudgetForm,
+    value: string,
+  ) => {
+    setBudget((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const budgetTotal = toNum(budget.total);
+
   const allocatedTotal = BUDGET_CATEGORIES.reduce(
     // Computes the total spending limit and sums up all itemized category costs using an array reduction.
-    (sum, key) => sum + toNum(budget[key]), // goes through each box and takes in the number the user added and then adds it like a machione
+    (sum, key) =>
+      sum + toNum(budget[key]), // goes through each box and takes in the number the user added and then adds it like a machione
     0,
   );
-  const remainingBudget = budgetTotal - allocatedTotal;
+
+  const remainingBudget =
+    budgetTotal - allocatedTotal;
 
   const handleCreateTrip = async () => {
-    const accessToken = localStorage.getItem("accessToken");
-    const savedProfile = localStorage.getItem("profile");
-    const profileId = savedProfile ? JSON.parse(savedProfile).profileId : null;
+    const accessToken =
+      localStorage.getItem("accessToken");
+
+    const savedProfile =
+      localStorage.getItem("profile");
+
+    const profileId = savedProfile
+      ? JSON.parse(savedProfile).profileId
+      : null;
 
     if (!accessToken) {
       alert("Access token is missing.");
       return;
     }
+
     if (!profileId) {
       alert("Profile id is missing");
       return;
@@ -203,68 +238,104 @@ export default function CreateTrips() {
 
       profileId,
       tripName: tripName || "New trip",
-      destination: destinations,
       // previously i did [traveleremails] which was creating an array of the array traveleremails hence the error of never finding that email in my backend , then i changed to this
       status: "PLANNING",
     };
 
-  try {
-  setIsCreating(true);
+    try {
+      setIsCreating(true);
 
-  const createdTrip = await createTrip(payload, accessToken);
+      const createdTrip = await createTrip(
+        payload,
+        accessToken,
+      );
+console.log("DESTINATIONS BEFORE CREATE:", destinations);
+      await Promise.all(
+        destinations.map((destination) =>
+          createDestination(
+            {
+              tripId: createdTrip.tripId,
+              name: destination.name,
+              latitude: destination.latitude,
+              longitude: destination.longitude,
+              arrivalDate:
+                destination.arrivalDate,
+              leaveDate:
+                destination.leaveDate,
+            },
+            accessToken,
+          ),
+        ),
+      );
 
-  await Promise.all(
-    travelerEmails.map(async (email) => {
-      const travelerProfile = await getProfile(
-        email,
+      await Promise.all(
+        travelerEmails.map(async (email) => {
+          const travelerProfile =
+            await getProfile(
+              email,
+              accessToken,
+            );
+
+          return createTraveler(
+            {
+              tripId: createdTrip.tripId,
+              profileId:
+                travelerProfile.profileId,
+              email,
+            },
+
+            accessToken,
+          );
+        }),
+      );
+
+      const budgetPayload = {
+        tripId: createdTrip.tripId,
+        profileId,
+        total: toNum(budget.total),
+        flights: toNum(budget.flights),
+        accommodation: toNum(
+          budget.accommodation,
+        ),
+        food: toNum(budget.food),
+        activities: toNum(
+          budget.activities,
+        ),
+        misc: toNum(budget.misc),
+      };
+
+      await createBudget(
+        budgetPayload,
         accessToken,
       );
 
-      return createTraveler(
-        {
+      if (notes.text.trim() !== "") {
+        const notesPayload = {
           tripId: createdTrip.tripId,
-          profileId: travelerProfile.profileId,
-          email,
-        },
-        accessToken,
-      );
-    }),
-  );
+          profileId,
+          text: notes.text.trim(),
+        };
 
-  const budgetPayload = {
-    tripId: createdTrip.tripId,
-    profileId,
-    total: toNum(budget.total),
-    flights: toNum(budget.flights),
-    accommodation: toNum(budget.accommodation),
-    food: toNum(budget.food),
-    activities: toNum(budget.activities),
-    misc: toNum(budget.misc),
+        await createNotes(
+          notesPayload,
+          accessToken,
+        );
+      }
+
+      alert("Trip created successfully!");
+      navigate("/home");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to create trip");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
-  await createBudget(budgetPayload, accessToken);
-
-  if (notes.text.trim() !== "") {
-    const notesPayload = {
-      tripId: createdTrip.tripId,
-      profileId,
-      text: notes.text.trim(),
-    };
-
-    await createNotes(notesPayload, accessToken);
-  }
-
-  alert("Trip created successfully!");
-  navigate("/home");
-} catch (error) {
-  console.error(error);
-  alert("Failed to create trip");
-} finally {
-  setIsCreating(false);
-}
-  };
-
-  const namedDestinations = destinations.filter((d) => d.name.trim());
+  const namedDestinations =
+    destinations.filter((d) =>
+      d.name.trim(),
+    );
 
   const tripDateRange = (() => {
     // Computes a human-readable date range and total night count across all scheduled destinations.
@@ -273,25 +344,67 @@ export default function CreateTrips() {
       .map((d) => d.arrivalDate)
       .filter(Boolean)
       .sort();
+
     const departures = namedDestinations
       .map((d) => d.leaveDate)
       .filter(Boolean)
       .sort();
-    if (!arrivals.length || !departures.length) return null;
+
+    if (
+      !arrivals.length ||
+      !departures.length
+    ) {
+      return null;
+    }
+
     const from = new Date(arrivals[0]);
-    const to = new Date(departures[departures.length - 1]);
-    const nights = Math.round((to.getTime() - from.getTime()) / 86400000);
+
+    const to = new Date(
+      departures[
+        departures.length - 1
+      ],
+    );
+
+    const nights = Math.round(
+      (to.getTime() - from.getTime()) /
+        86400000,
+    );
+
     const fmt = (d: Date) =>
-      d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    return `${fmt(from)} – ${fmt(to)}${nights > 0 ? ` · ${nights}n` : ""}`;
+      d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+
+    return `${fmt(from)} – ${fmt(to)}${
+      nights > 0
+        ? ` · ${nights}n`
+        : ""
+    }`;
   })();
 
   const steps = [
     // Defines a read-only configuration array for rendering the timeline navigation steps and icons.
-    { n: 1, label: "Destinations", icon: <FaMapMarkerAlt /> },
-    { n: 2, label: "Travelers", icon: <FaUsers /> },
-    { n: 3, label: "Budget", icon: <FaDollarSign /> },
-    { n: 4, label: "Notes", icon: <FaStickyNote /> },
+    {
+      n: 1,
+      label: "Destinations",
+      icon: <FaMapMarkerAlt />,
+    },
+    {
+      n: 2,
+      label: "Travelers",
+      icon: <FaUsers />,
+    },
+    {
+      n: 3,
+      label: "Budget",
+      icon: <FaDollarSign />,
+    },
+    {
+      n: 4,
+      label: "Notes",
+      icon: <FaStickyNote />,
+    },
   ] as const;
 
   const handleLocationSearch = (
@@ -304,68 +417,92 @@ export default function CreateTrips() {
       (
         current, //gets the current array and helps create a brand new one
       ) =>
-        current.map((destination, destinationIndex) =>
-          destinationIndex === index
-            ? {
-                //Creates a new destrination object
-                ...destination, //copies the old properties so we dont lose starting and arrival date
-                name: value,
-                latitude: 0, // we reset the coordinates once the user starts typing again bc we dont know what location they mean
-                longitude: 0,
-              }
-            : destination,
+        current.map(
+          (
+            destination,
+            destinationIndex,
+          ) =>
+            destinationIndex === index
+              ? {
+                  //Creates a new destrination object
+                  ...destination, //copies the old properties so we dont lose starting and arrival date
+                  name: value,
+                  latitude: 0, // we reset the coordinates once the user starts typing again bc we dont know what location they mean
+                  longitude: 0,
+                }
+              : destination,
         ),
     );
 
     // Cancel the previous timer for this stop.
-    window.clearTimeout(searchTimers.current[index]); //cancels pending api requests as the user is typong , also known as debouncing , when the user stops typoing for 350 ms thats when the api gets called
+    window.clearTimeout(
+      searchTimers.current[index],
+    ); //cancels pending api requests as the user is typong , also known as debouncing , when the user stops typoing for 350 ms thats when the api gets called
 
     if (value.trim().length < 3) {
       // doesnt show suggestions if user has typed less than 3 characters
-      setLocationSuggestions((current) => ({
-        ...current,
-        [index]: [],
-      }));
+      setLocationSuggestions(
+        (current) => ({
+          ...current,
+          [index]: [],
+        }),
+      );
 
       return;
     }
 
-    searchTimers.current[index] = window.setTimeout(async () => {
-      // function will run after 200 ms
-      const accessToken = localStorage.getItem("accessToken");
+    searchTimers.current[index] =
+      window.setTimeout(async () => {
+        // function will run after 200 ms
+        const accessToken =
+          localStorage.getItem(
+            "accessToken",
+          );
 
-      if (!accessToken) return;
+        if (!accessToken) return;
 
-      try {
-        setSearchingLocation((current) => ({
-          ...current,
-          [index]: true,
-        }));
+        try {
+          setSearchingLocation(
+            (current) => ({
+              ...current,
+              [index]: true,
+            }),
+          );
 
-        const suggestions = await getLocationSuggestions(
-          // where frontend calls my backend
-          value.trim(),
-          accessToken,
-        );
+          const suggestions =
+            await getLocationSuggestions(
+              // where frontend calls my backend
+              value.trim(),
+              accessToken,
+            );
 
-        setLocationSuggestions((current) => ({
-          ...current,
-          [index]: suggestions,
-        }));
-      } catch (error) {
-        console.error("Failed to load location suggestions:", error);
+          setLocationSuggestions(
+            (current) => ({
+              ...current,
+              [index]: suggestions,
+            }),
+          );
+        } catch (error) {
+          console.error(
+            "Failed to load location suggestions:",
+            error,
+          );
 
-        setLocationSuggestions((current) => ({
-          ...current,
-          [index]: [],
-        }));
-      } finally {
-        setSearchingLocation((current) => ({
-          ...current,
-          [index]: false,
-        }));
-      }
-    }, 200);
+          setLocationSuggestions(
+            (current) => ({
+              ...current,
+              [index]: [],
+            }),
+          );
+        } finally {
+          setSearchingLocation(
+            (current) => ({
+              ...current,
+              [index]: false,
+            }),
+          );
+        }
+      }, 200);
   };
 
   const selectLocation = async (
@@ -373,7 +510,8 @@ export default function CreateTrips() {
     index: number,
     suggestion: LocationSuggestion,
   ) => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken =
+      localStorage.getItem("accessToken");
 
     if (!accessToken) {
       alert("Please log in again.");
@@ -381,39 +519,50 @@ export default function CreateTrips() {
     }
 
     try {
-      const place = await getPlaceDetails(
-        suggestion.placeId, //what i got back from my autocomplete api
-        accessToken,
-      );
+      const place =
+        await getPlaceDetails(
+          suggestion.placeId, //what i got back from my autocomplete api
+          accessToken,
+        );
+      
 
       setDestinations((current) =>
-        current.map((destination, destinationIndex) =>
-          destinationIndex === index
-            ? {
-                ...destination,
+        current.map(
+          (
+            destination,
+            destinationIndex,
+          ) =>
+            destinationIndex === index
+              ? {
+                  ...destination,
 
-                // Keep arrivalDate and leavingDate from
-                // the existing destination.
-                name:
-                  place.displayName?.text ||
-                  suggestion.name ||
-                  place.formattedAddress ||
-                  "",
+                  // Keep arrivalDate and leavingDate from
+                  // the existing destination.
+                  name:
+                    place.displayName?.text ||
+                    suggestion.name ||
+                    place.formattedAddress ||
+                    "",
 
-                latitude: place.location?.latitude ?? 0,
+                  latitude: place.latitude ?? 0,
 
-                longitude: place.location?.longitude ?? 0,
-              }
-            : destination,
+          longitude: place.longitude ?? 0,
+                }
+              : destination,
         ),
       );
 
-      setLocationSuggestions((current) => ({
-        ...current,
-        [index]: [],
-      }));
+      setLocationSuggestions(
+        (current) => ({
+          ...current,
+          [index]: [],
+        }),
+      );
     } catch (error) {
-      console.error("Failed to load place details:", error);
+      console.error(
+        "Failed to load place details:",
+        error,
+      );
     }
   };
 
@@ -422,18 +571,25 @@ export default function CreateTrips() {
       <section className="create-trip-container">
         <div className="wizard-header">
           <h1>Plan a new trip</h1>
+
           <div className="steps-track">
-            {steps.map(({ n, label, icon }) => (
-              <button
-                key={n}
-                className={
-                  step === n ? "step active" : step > n ? "step done" : "step"
-                }
-              >
-                {icon}
-                {label}
-              </button>
-            ))}
+            {steps.map(
+              ({ n, label, icon }) => (
+                <button
+                  key={n}
+                  className={
+                    step === n
+                      ? "step active"
+                      : step > n
+                        ? "step done"
+                        : "step"
+                  }
+                >
+                  {icon}
+                  {label}
+                </button>
+              ),
+            )}
           </div>
         </div>
 
@@ -442,139 +598,252 @@ export default function CreateTrips() {
             {step === 1 && (
               <>
                 <div className="trip-form-card">
-                  <h2>Where are you going?</h2>
-                  <p>Add one destination or build a multi-stop itinerary.</p>
+                  <h2>
+                    Where are you going?
+                  </h2>
 
-                  <label className="form-label">Trip name</label>
+                  <p>
+                    Add one destination or
+                    build a multi-stop
+                    itinerary.
+                  </p>
+
+                  <label className="form-label">
+                    Trip name
+                  </label>
+
                   <input
                     value={tripName}
-                    onChange={(e) => setTripName(e.target.value)}
+                    onChange={(e) =>
+                      setTripName(
+                        e.target.value,
+                      )
+                    }
                     placeholder="e.g. Summer in Mexico"
                   />
 
                   <div className="section-subhead">
-                    <span className="form-label">Destinations</span>
+                    <span className="form-label">
+                      Destinations
+                    </span>
 
                     <button
                       type="button"
                       className="add-stop-icon"
-                      onClick={addDestination}
+                      onClick={
+                        addDestination
+                      }
                       aria-label="Add destination"
                     >
                       <FaPlus />
                     </button>
                   </div>
 
-                  {destinations.map((dest, index) => (
-                    <div className="destination-card" key={index}>
-                      <div className="destination-card-head">
-                        <strong>Stop {index + 1}</strong>
-                      </div>
+                  {destinations.map(
+                    (dest, index) => (
+                      <div
+                        className="destination-card"
+                        key={index}
+                      >
+                        <div className="destination-card-head">
+                          <strong>
+                            Stop {index + 1}
+                          </strong>
+                        </div>
 
-                      <label>Destination</label>
+                        <label>
+                          Destination
+                        </label>
 
-                      <div className="location-autocomplete">
-                        <input
-                          type="text"
-                          value={dest.name}
-                          placeholder="Search for a destination"
-                          autoComplete="off"
-                          onChange={(event) =>
-                            handleLocationSearch(index, event.target.value)
-                          }
-                        />
-
-                        {searchingLocation[index] && (
-                          <div className="location-search-message">
-                            Searching...
-                          </div>
-                        )}
-
-                        {(locationSuggestions[index]?.length ?? 0) > 0 && (
-                          <div className="location-suggestion-list">
-                            {locationSuggestions[index].map((suggestion) => (
-                              <button
-                                type="button"
-                                className="location-suggestion-item"
-                                key={suggestion.placeId}
-                                onClick={() =>
-                                  selectLocation(index, suggestion)
-                                }
-                              >
-                                {suggestion.name}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="two-column">
-                        <div>
-                          <label>Arriving</label>
+                        <div className="location-autocomplete">
                           <input
-                            type="date"
-                            value={dest.arrivalDate}
-                            min={
-                              index === 0 // tells me which stop i am rendering
-                                ? getToday()
-                                : destinations[index - 1].leaveDate // if not the first stop, code lookjs at the previous stop to check when u are scheduled to leave it
-                                  ? addOneDay(destinations[index - 1].leaveDate)
-                                  : getToday()
+                            type="text"
+                            value={
+                              dest.name
                             }
-                            disabled={
-                              index > 0 && !destinations[index - 1].leaveDate
-                            } // doesnt let users check for stop 3 or 2 unless they have filled out stop 1
-                            onChange={(e) =>
-                              updateDestinationDate(
+                            placeholder="Search for a destination"
+                            autoComplete="off"
+                            onChange={(
+                              event,
+                            ) =>
+                              handleLocationSearch(
                                 index,
-                                "arrivalDate",
-                                e.target.value,
+                                event
+                                  .target
+                                  .value,
                               )
                             }
                           />
+
+                          {searchingLocation[
+                            index
+                          ] && (
+                            <div className="location-search-message">
+                              Searching...
+                            </div>
+                          )}
+
+                          {(locationSuggestions[
+                            index
+                          ]?.length ??
+                            0) >
+                            0 && (
+                            <div className="location-suggestion-list">
+                              {locationSuggestions[
+                                index
+                              ].map(
+                                (
+                                  suggestion,
+                                ) => (
+                                  <button
+                                    type="button"
+                                    className="location-suggestion-item"
+                                    key={
+                                      suggestion.placeId
+                                    }
+                                    onClick={() =>
+                                      selectLocation(
+                                        index,
+                                        suggestion,
+                                      )
+                                    }
+                                  >
+                                    {
+                                      suggestion.name
+                                    }
+                                  </button>
+                                ),
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <div>
-                          <label>Leaving</label>
-                          <input
-                            type="date"
-                            value={dest.leaveDate}
-                            min={dest.arrivalDate || getToday()}
-                            disabled={!dest.arrivalDate}
-                            onChange={(e) =>
-                              updateDestinationDate(
+
+                        <div className="two-column">
+                          <div>
+                            <label>
+                              Arriving
+                            </label>
+
+                            <input
+                              type="date"
+                              value={
+                                dest.arrivalDate
+                              }
+                              min={
+                                index === 0 // tells me which stop i am rendering
+                                  ? getToday()
+                                  : destinations[
+                                        index -
+                                          1
+                                      ]
+                                        .leaveDate // if not the first stop, code lookjs at the previous stop to check when u are scheduled to leave it
+                                    ? addOneDay(
+                                        destinations[
+                                          index -
+                                            1
+                                        ]
+                                          .leaveDate,
+                                      )
+                                    : getToday()
+                              }
+                              disabled={
+                                index >
+                                  0 &&
+                                !destinations[
+                                  index - 1
+                                ].leaveDate
+                              } // doesnt let users check for stop 3 or 2 unless they have filled out stop 1
+                              onChange={(
+                                e,
+                              ) =>
+                                updateDestinationDate(
+                                  index,
+                                  "arrivalDate",
+                                  e.target
+                                    .value,
+                                )
+                              }
+                            />
+                          </div>
+
+                          <div>
+                            <label>
+                              Leaving
+                            </label>
+
+                            <input
+                              type="date"
+                              value={
+                                dest.leaveDate
+                              }
+                              min={
+                                dest.arrivalDate ||
+                                getToday()
+                              }
+                              disabled={
+                                !dest.arrivalDate
+                              }
+                              onChange={(
+                                e,
+                              ) =>
+                                updateDestinationDate(
+                                  index,
+                                  "leaveDate",
+                                  e.target
+                                    .value,
+                                )
+                              }
+                            />
+                          </div>
+                        </div>
+
+                        <div className="destination-delete">
+                          <button
+                            type="button"
+                            className="add-stop-icon"
+                            onClick={() =>
+                              removeDestination(
                                 index,
-                                "leaveDate",
-                                e.target.value,
                               )
                             }
-                          />
+                            aria-label={`Remove stop ${
+                              index + 1
+                            }`}
+                          >
+                            <FaTrash />
+                          </button>
                         </div>
                       </div>
-                      <div className="destination-delete">
-                        <button
-                          type="button"
-                          className="add-stop-icon"
-                          onClick={() => removeDestination(index)}
-                          aria-label={`Remove stop ${index + 1}`}
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
 
                 <div className="step-actions right">
                   <button
                     className="primary-btn"
                     onClick={() => {
-                      if (tripName.trim() === "") {
-                        alert("Please enter a trip name.");
+                      if (
+                        tripName.trim() ===
+                        ""
+                      ) {
+                        alert(
+                          "Please enter a trip name.",
+                        );
+
                         return;
                       }
 
-                      if (destinations.every((d) => d.name.trim() === "")) {
-                        alert("Please add at least one destination.");
+                      if (
+                        destinations.every(
+                          (d) =>
+                            d.name.trim() ===
+                            "",
+                        )
+                      ) {
+                        alert(
+                          "Please add at least one destination.",
+                        );
+
                         return;
                       }
 
@@ -591,16 +860,28 @@ export default function CreateTrips() {
               <>
                 <div className="trip-form-card">
                   <h2>Who's coming?</h2>
-                  <p>Add traveler emails for people joining this trip.</p>
 
-                  <label>Traveler email</label>
+                  <p>
+                    Add traveler emails for
+                    people joining this trip.
+                  </p>
+
+                  <label>
+                    Traveler email
+                  </label>
 
                   <div className="inline-input">
                     <input
                       value={travelerEmail}
-                      onChange={(e) => setTravelerEmail(e.target.value)}
+                      onChange={(e) =>
+                        setTravelerEmail(
+                          e.target.value,
+                        )
+                      }
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") {
+                        if (
+                          e.key === "Enter"
+                        ) {
                           e.preventDefault();
                           addTravelerEmail();
                         }
@@ -608,38 +889,65 @@ export default function CreateTrips() {
                       placeholder="Enter traveler email"
                     />
 
-                    <button type="button" onClick={addTravelerEmail}>
+                    <button
+                      type="button"
+                      onClick={
+                        addTravelerEmail
+                      }
+                    >
                       Add
                     </button>
                   </div>
 
                   <div className="traveler-list">
-                    {travelerEmails.length === 0 ? (
+                    {travelerEmails.length ===
+                    0 ? (
                       <p className="empty-text">
-                        No extra travelers added yet.
+                        No extra travelers
+                        added yet.
                       </p>
                     ) : (
-                      travelerEmails.map((email) => (
-                        <span className="traveler-chip" key={email}>
-                          {email}
-                          <button
-                            type="button"
-                            onClick={() => removeTravelerEmail(email)}
+                      travelerEmails.map(
+                        (email) => (
+                          <span
+                            className="traveler-chip"
+                            key={email}
                           >
-                            ×
-                          </button>
-                        </span>
-                      ))
+                            {email}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeTravelerEmail(
+                                  email,
+                                )
+                              }
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ),
+                      )
                     )}
                   </div>
                 </div>
 
                 <div className="step-actions">
-                  <button className="ghost-btn" onClick={() => setStep(1)}>
+                  <button
+                    className="ghost-btn"
+                    onClick={() =>
+                      setStep(1)
+                    }
+                  >
                     Back
                   </button>
 
-                  <button className="primary-btn" onClick={() => setStep(3)}>
+                  <button
+                    className="primary-btn"
+                    onClick={() =>
+                      setStep(3)
+                    }
+                  >
                     Budget
                   </button>
                 </div>
@@ -649,48 +957,90 @@ export default function CreateTrips() {
             {step === 3 && (
               <>
                 <div className="trip-form-card">
-                  <h2>What's your budget?</h2>
-                  <p>Set a total budget and split it by category.</p>
+                  <h2>
+                    What's your budget?
+                  </h2>
+
+                  <p>
+                    Set a total budget and
+                    split it by category.
+                  </p>
 
                   <label>Currency</label>
+
                   <select
                     value={budget.currency}
                     onChange={(e) =>
-                      handleBudgetChange("currency", e.target.value)
+                      handleBudgetChange(
+                        "currency",
+                        e.target.value,
+                      )
                     }
                   >
-                    <option value="USD">USD — US Dollar</option>
-                    <option value="CAD">CAD — Canadian Dollar</option>
-                    <option value="EUR">EUR — Euro</option>
-                    <option value="GBP">GBP — British Pound</option>
+                    <option value="USD">
+                      USD — US Dollar
+                    </option>
+
+                    <option value="CAD">
+                      CAD — Canadian Dollar
+                    </option>
+
+                    <option value="EUR">
+                      EUR — Euro
+                    </option>
+
+                    <option value="GBP">
+                      GBP — British Pound
+                    </option>
                   </select>
 
-                  <label>Total budget</label>
+                  <label>
+                    Total budget
+                  </label>
+
                   <input
                     type="number"
                     value={budget.total}
                     onChange={(e) =>
-                      handleBudgetChange("total", e.target.value)
+                      handleBudgetChange(
+                        "total",
+                        e.target.value,
+                      )
                     }
                     placeholder="0"
                     min="0"
                   />
 
                   <div className="budget-grid">
-                    {BUDGET_CATEGORIES.map((field) => (
-                      <div key={field}>
-                        <label>{capitalize(field)}</label>
-                        <input
-                          type="number"
-                          value={budget[field]}
-                          onChange={(e) =>
-                            handleBudgetChange(field, e.target.value)
-                          }
-                          placeholder="0"
-                          min="0"
-                        />
-                      </div>
-                    ))}
+                    {BUDGET_CATEGORIES.map(
+                      (field) => (
+                        <div key={field}>
+                          <label>
+                            {capitalize(
+                              field,
+                            )}
+                          </label>
+
+                          <input
+                            type="number"
+                            value={
+                              budget[field]
+                            }
+                            onChange={(
+                              e,
+                            ) =>
+                              handleBudgetChange(
+                                field,
+                                e.target
+                                  .value,
+                              )
+                            }
+                            placeholder="0"
+                            min="0"
+                          />
+                        </div>
+                      ),
+                    )}
                   </div>
 
                   <p
@@ -701,20 +1051,39 @@ export default function CreateTrips() {
                     }
                   >
                     {budgetTotal > 0
-                      ? remainingBudget < 0
-                        ? `${budget.currency} ${Math.abs(remainingBudget).toLocaleString()} over budget`
-                        : remainingBudget === 0
+                      ? remainingBudget <
+                        0
+                        ? `${
+                            budget.currency
+                          } ${Math.abs(
+                            remainingBudget,
+                          ).toLocaleString()} over budget`
+                        : remainingBudget ===
+                            0
                           ? "Fully allocated"
-                          : `${budget.currency} ${remainingBudget.toLocaleString()} left to allocate`
+                          : `${
+                              budget.currency
+                            } ${remainingBudget.toLocaleString()} left to allocate`
                       : "Enter a total budget to track remaining amount."}
                   </p>
                 </div>
 
                 <div className="step-actions">
-                  <button className="ghost-btn" onClick={() => setStep(2)}>
+                  <button
+                    className="ghost-btn"
+                    onClick={() =>
+                      setStep(2)
+                    }
+                  >
                     Back
                   </button>
-                  <button className="primary-btn" onClick={() => setStep(4)}>
+
+                  <button
+                    className="primary-btn"
+                    onClick={() =>
+                      setStep(4)
+                    }
+                  >
                     Notes
                   </button>
                 </div>
@@ -725,11 +1094,18 @@ export default function CreateTrips() {
               <>
                 <div className="trip-form-card">
                   <h2>Notes</h2>
+
                   <p>
-                    Add anything worth remembering — visa requirements,
-                    restaurants, insurance, or reminders. You can plan out each
-                    day in detail once the trip is created.
+                    Add anything worth
+                    remembering — visa
+                    requirements,
+                    restaurants, insurance,
+                    or reminders. You can
+                    plan out each day in
+                    detail once the trip is
+                    created.
                   </p>
+
                   <textarea
                     value={notes.text}
                     onChange={(e) =>
@@ -743,16 +1119,27 @@ export default function CreateTrips() {
                 </div>
 
                 <div className="step-actions">
-                  <button className="ghost-btn" onClick={() => setStep(3)}>
+                  <button
+                    className="ghost-btn"
+                    onClick={() =>
+                      setStep(3)
+                    }
+                  >
                     Back
                   </button>
+
                   <button
                     className="primary-btn success"
-                    onClick={handleCreateTrip}
+                    onClick={
+                      handleCreateTrip
+                    }
                     disabled={isCreating}
                   >
                     <FaPlane />
-                    {isCreating ? "Creating..." : "Create trip"}
+
+                    {isCreating
+                      ? "Creating..."
+                      : "Create trip"}
                   </button>
                 </div>
               </>
@@ -762,9 +1149,16 @@ export default function CreateTrips() {
           <aside className="trip-summary-card">
             <div className="summary-hero">
               <span>Your trip</span>
-              <h2>{tripName || "Name your trip"}</h2>
+
+              <h2>
+                {tripName ||
+                  "Name your trip"}
+              </h2>
+
               <p>
-                {namedDestinations.map((d) => d.name).join(" → ") ||
+                {namedDestinations
+                  .map((d) => d.name)
+                  .join(" → ") ||
                   "Add destinations to see your route"}
               </p>
             </div>
@@ -772,31 +1166,55 @@ export default function CreateTrips() {
             <div className="summary-body">
               <div>
                 <small>Dates</small>
-                <strong>{tripDateRange ?? "Not set"}</strong>
-              </div>
-              <div>
-                <small>Destinations</small>
+
                 <strong>
-                  {namedDestinations.length > 0
+                  {tripDateRange ??
+                    "Not set"}
+                </strong>
+              </div>
+
+              <div>
+                <small>
+                  Destinations
+                </small>
+
+                <strong>
+                  {namedDestinations.length >
+                  0
                     ? namedDestinations.length
                     : "Not set"}
                 </strong>
               </div>
+
               <div>
-                <small>Travelers</small>
-                <strong>{1 + travelerEmails.length}</strong>
+                <small>
+                  Travelers
+                </small>
+
+                <strong>
+                  {1 +
+                    travelerEmails.length}
+                </strong>
               </div>
+
               <div>
                 <small>Budget</small>
+
                 <strong>
                   {budgetTotal > 0
-                    ? `${budget.currency} ${budgetTotal.toLocaleString()}`
+                    ? `${
+                        budget.currency
+                      } ${budgetTotal.toLocaleString()}`
                     : "Not set"}
                 </strong>
               </div>
+
               <div>
                 <small>Status</small>
-                <strong>Planning</strong>
+
+                <strong>
+                  Planning
+                </strong>
               </div>
             </div>
           </aside>

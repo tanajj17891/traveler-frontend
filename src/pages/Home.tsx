@@ -21,6 +21,10 @@ import {
 import { updateProfile, type CreateProfileRequest } from "../api/profileAPI";
 import "./Home.css";
 import { getTripsByProfileId, type Trip } from "../api/tripsAPI";
+import {
+  getDestinationsByTripId,
+  type DestinationResponse,
+} from "../api/destinationsAPI";
 
 const emptyProfile: CreateProfileRequest = {
   cognitoSub: "",
@@ -62,6 +66,9 @@ export default function Home() {
   const [profile, setProfile] = useState<CreateProfileRequest>(emptyProfile); // stores profile data
   const [trips, setTrips] = useState<Trip[]>([]);
   //previously the trips of array did not excist inside the use state so it didnt know what was inside the array bnut now it does
+  const [tripDestinations, setTripDestinations] = useState<
+  Record<string, DestinationResponse[]>
+>({});
   const navigate = useNavigate();
 
   const handleSignOut = () => {
@@ -122,6 +129,40 @@ export default function Home() {
       );
 
       setTrips(loadedTrips);
+      const destinationResults = await Promise.all(
+  loadedTrips.map(async (trip) => {
+    try {
+      const destinations = await getDestinationsByTripId(
+        trip.tripId,
+        accessToken,
+      );
+
+      return {
+        tripId: trip.tripId,
+        destinations,
+      };
+    } catch (error) {
+      console.error(
+        `Failed to load destinations for trip ${trip.tripId}:`,
+        error,
+      );
+
+      return {
+        tripId: trip.tripId,
+        destinations: [],
+      };
+    }
+  }),
+);
+
+const destinationsByTrip = destinationResults.reduce<
+  Record<string, DestinationResponse[]>
+>((accumulator, result) => {
+  accumulator[result.tripId] = result.destinations;
+  return accumulator;
+}, {});
+
+setTripDestinations(destinationsByTrip);
     } catch (error) {
       console.error("Failed to load home data:", error);
       toast.error("Failed to load your profile or trips.");
@@ -599,9 +640,10 @@ export default function Home() {
     ) : (
       <div className="home-trip-list">
         {trips.map((trip) => {
-            console.log("Full trip object:", trip);
-  console.log("Trip ID value:", trip.tripId);
-          const firstDestination = trip.destination?.[0];
+           
+         const firstDestination =
+  tripDestinations[trip.tripId]?.[0];
+
           const status = trip.status || "PLANNING";
 
           return (
