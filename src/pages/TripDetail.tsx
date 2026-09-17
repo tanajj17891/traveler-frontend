@@ -58,6 +58,15 @@ import {
   type DestinationResponse,
 } from "../api/destinationsAPI";
 
+import {
+  createActivity,
+  getActivitiesByDestinationAndDay,
+  updateActivity,
+  deleteActivity,
+  type ActivityResponse,
+  type ActivityType,
+} from "../api/activityAPI";
+
 type Budget = {
   currency: string;
   total: number;
@@ -214,6 +223,19 @@ export default function TripDetail() {
   const [saving, setSaving] = useState(false);
   const [travelerEmail, setTravelerEmail] = useState("");
 
+  const [activities, setActivities] = useState<ActivityResponse[]>([]);
+  const [selectedDestinationId, setSelectedDestinationId] = useState("");
+  const [selectedDay, setSelectedDay] = useState(1);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [showActivityForm, setShowActivityForm] = useState(false);
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+  const [activityForm, setActivityForm] = useState({
+    startTime: "",
+    activityType: "ACTIVITY" as ActivityType,
+    description: "",
+    notes: "",
+  });
+
   const [checklist, setChecklist] = useState([
     { id: 1, label: "Book flights", done: false },
     { id: 2, label: "Reserve accommodation", done: false },
@@ -369,11 +391,213 @@ export default function TripDetail() {
     void loadTrip();
   }, [navigate, tripId]);
 
+
+
+  useEffect(() => {
+    const loadActivities = async () => {
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (!accessToken || !selectedDestinationId) {
+        setActivities([]);
+        return;
+      }
+
+      try {
+        setActivityLoading(true);
+        const loadedActivities = await getActivitiesByDestinationAndDay(
+          selectedDestinationId,
+          selectedDay,
+          accessToken,
+        );
+        setActivities(loadedActivities);
+      } catch (error) {
+        console.error("Failed to load activities:", error);
+        setActivities([]);
+      } finally {
+        setActivityLoading(false);
+      }
+    };
+
+    void loadActivities();
+  }, [selectedDestinationId, selectedDay]);
+
+const sortedDestinations = [...destinations].sort((a, b) => {
+  if (!a.arrivalDate && !b.arrivalDate) return 0;
+  if (!a.arrivalDate) return 1;
+  if (!b.arrivalDate) return -1;
+
+  return a.arrivalDate.localeCompare(b.arrivalDate);
+});
+
+const activeDestinationId =
+  selectedDestinationId &&
+  sortedDestinations.some(
+    (destination) =>
+      destination.destinationId === selectedDestinationId,
+  )
+    ? selectedDestinationId
+    : sortedDestinations[0]?.destinationId ?? "";
+
+const selectedDestination = sortedDestinations.find(
+  (destination) =>
+    destination.destinationId === activeDestinationId,
+);
+
+
+
+  const destinationDayCount = selectedDestination
+    ? Math.max(
+        1,
+        getNights(
+          selectedDestination.arrivalDate,
+          selectedDestination.leaveDate,
+        ) + 1,
+      )
+    : 0;
+
+  const getDayDate = (day: number) => {
+    if (!selectedDestination?.arrivalDate) return "";
+
+    const date = new Date(`${selectedDestination.arrivalDate}T00:00:00`);
+    date.setDate(date.getDate() + day - 1);
+    return date.toISOString().slice(0, 10);
+  };
+
+  const resetActivityForm = () => {
+    setActivityForm({
+      startTime: "",
+      activityType: "ACTIVITY" as ActivityType,
+      description: "",
+      notes: "",
+    });
+    setEditingActivityId(null);
+    setShowActivityForm(false);
+  };
+
+  const handleActivitySubmit = async () => {
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!accessToken || !selectedDestinationId) return;
+
+    if (!activityForm.startTime || !activityForm.description.trim()) {
+      toast.error("Add a start time and description.");
+      return;
+    }
+
+    try {
+      if (editingActivityId) {
+        const updated = await updateActivity(
+          editingActivityId,
+          {
+            day: selectedDay,
+            startTime: activityForm.startTime,
+            activityType: activityForm.activityType,
+            description: activityForm.description.trim(),
+            notes: activityForm.notes.trim(),
+          },
+          accessToken,
+        );
+
+        setActivities((current) =>
+          current
+            .map((activity) =>
+              activity.activityId === editingActivityId ? updated : activity,
+            )
+            .sort((a, b) => a.startTime.localeCompare(b.startTime)),
+        );
+        toast.success("Activity updated.");
+      } else {
+        const created = await createActivity(
+          {
+            destinationId: selectedDestinationId,
+            day: selectedDay,
+            startTime: activityForm.startTime,
+            activityType: activityForm.activityType,
+            description: activityForm.description.trim(),
+            notes: activityForm.notes.trim() || undefined,
+          },
+          accessToken,
+        );
+
+        setActivities((current) =>
+          [...current, created].sort((a, b) =>
+            a.startTime.localeCompare(b.startTime),
+          ),
+        );
+        toast.success("Activity added.");
+      }
+
+      resetActivityForm();
+    } catch (error) {
+      console.error("Failed to save activity:", error);
+      toast.error("Failed to save activity.");
+    }
+  };
+
+  const handleEditActivity = (activity: ActivityResponse) => {
+    setActivityForm({
+      startTime: activity.startTime,
+      activityType: activity.activityType,
+      description: activity.description,
+      notes: activity.notes ?? "",
+    });
+    setEditingActivityId(activity.activityId);
+    setShowActivityForm(true);
+  };
+
+  const handleDeleteActivity = async (activityId: string) => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) return;
+
+    try {
+      await deleteActivity(activityId, accessToken);
+      setActivities((current) =>
+        current.filter((activity) => activity.activityId !== activityId),
+      );
+      toast.success("Activity deleted.");
+    } catch (error) {
+      console.error("Failed to delete activity:", error);
+      toast.error("Failed to delete activity.");
+    }
+  };
+
+  const getActivityIcon = (activityType: ActivityType) => {
+    switch (activityType) {
+      case "FLIGHT":
+        return <FaPlane />;
+      case "HOTEL_CHECK_IN":
+      case "HOTEL_CHECK_OUT":
+        return <FaBuilding />;
+      case "FOOD_AND_DRINK":
+        return <FaUtensils />;
+      case "ACTIVITY":
+        return <FaTicketAlt />;
+      default:
+        return <FaEllipsisH />;
+    }
+  };
+
+  const formatActivityType = (activityType: ActivityType) =>
+    activityType
+      .toLowerCase()
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
   const shownTrip = editing ? draftTrip : trip;
 
-  const shownDestinations = editing
-    ? draftDestinations
-    : destinations;
+const shownDestinations = (
+  editing ? draftDestinations : destinations
+).slice().sort((a, b) => {
+  if (!a.arrivalDate && !b.arrivalDate) return 0;
+  if (!a.arrivalDate) return 1;
+  if (!b.arrivalDate) return -1;
+
+  return (
+    new Date(`${a.arrivalDate}T00:00:00`).getTime() -
+    new Date(`${b.arrivalDate}T00:00:00`).getTime()
+  );
+});
 
   const shownBudget = editing ? draftBudget : budget;
 
@@ -1190,6 +1414,218 @@ export default function TripDetail() {
               >
                 <FaPlus /> Add another stop
               </button>
+            )}
+          </article>
+
+          <article className="trip-card agenda-card">
+            <div className="card-heading agenda-heading">
+              <div>
+                <h2>Daily agenda</h2>
+                <p>Plan what you want to do each day</p>
+              </div>
+            </div>
+
+            {sortedDestinations.length === 0 ? (
+              <p className="agenda-empty">Add a destination to start planning activities.</p>
+            ) : (
+              <>
+                <div className="agenda-destination-tabs">
+                  {sortedDestinations.map((destination) => (
+                    <button
+                      type="button"
+                      key={destination.destinationId}
+                      className={
+                        selectedDestinationId === destination.destinationId
+                          ? "agenda-destination-tab active"
+                          : "agenda-destination-tab"
+                      }
+                      onClick={() => {
+                        setSelectedDestinationId(destination.destinationId);
+                        setSelectedDay(1);
+                        resetActivityForm();
+                      }}
+                    >
+                      <FaMapMarkerAlt />
+                      <span>{destination.name}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="agenda-day-tabs">
+                  {Array.from({ length: destinationDayCount }, (_, index) => {
+                    const day = index + 1;
+                    const dayDate = getDayDate(day);
+
+                    return (
+                      <button
+                        type="button"
+                        key={day}
+                        className={
+                          selectedDay === day
+                            ? "agenda-day-tab active"
+                            : "agenda-day-tab"
+                        }
+                        onClick={() => {
+                          setSelectedDay(day);
+                          resetActivityForm();
+                        }}
+                      >
+                        <strong>Day {day}</strong>
+                        <span>{dayDate ? formatDate(dayDate, false) : ""}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="agenda-selected-day">
+                  <div>
+                    <strong>Day {selectedDay}</strong>
+                    <span>
+                      {getDayDate(selectedDay)
+                        ? formatDate(getDayDate(selectedDay))
+                        : ""}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="agenda-add-button"
+                    onClick={() => {
+                      setEditingActivityId(null);
+                      setActivityForm({
+                        startTime: "",
+                        activityType: "ACTIVITY" as ActivityType,
+                        description: "",
+                        notes: "",
+                      });
+                      setShowActivityForm(true);
+                    }}
+                  >
+                    <FaPlus /> Add activity
+                  </button>
+                </div>
+
+                {showActivityForm && (
+                  <div className="activity-form">
+                    <div className="activity-form-grid">
+                      <label>
+                        <span>Start time</span>
+                        <input
+                          type="time"
+                          value={activityForm.startTime}
+                          onChange={(event) =>
+                            setActivityForm((current) => ({
+                              ...current,
+                              startTime: event.target.value,
+                            }))
+                          }
+                        />
+                      </label>
+
+                      <label>
+                        <span>Activity type</span>
+                        <select
+                          value={activityForm.activityType}
+                          onChange={(event) =>
+                            setActivityForm((current) => ({
+                              ...current,
+                              activityType: event.target.value as ActivityType,
+                            }))
+                          }
+                        >
+                          <option value="FLIGHT">Flight</option>
+                          <option value="HOTEL_CHECK_IN">Hotel check in</option>
+                          <option value="HOTEL_CHECK_OUT">Hotel check out</option>
+                          <option value="FOOD_AND_DRINK">Food &amp; drink</option>
+                          <option value="ACTIVITY">Activity</option>
+                          <option value="OTHER">Other</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <label>
+                      <span>Description</span>
+                      <input
+                        type="text"
+                        value={activityForm.description}
+                        placeholder="e.g. Snorkeling tour"
+                        onChange={(event) =>
+                          setActivityForm((current) => ({
+                            ...current,
+                            description: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      <span>Notes</span>
+                      <textarea
+                        value={activityForm.notes}
+                        placeholder="Add any details..."
+                        onChange={(event) =>
+                          setActivityForm((current) => ({
+                            ...current,
+                            notes: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+
+                    <div className="activity-form-actions">
+                      <button type="button" className="activity-cancel" onClick={resetActivityForm}>
+                        Cancel
+                      </button>
+                      <button type="button" className="activity-save" onClick={() => void handleActivitySubmit()}>
+                        {editingActivityId ? "Save activity" : "Add activity"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {activityLoading ? (
+                  <p className="agenda-empty">Loading activities...</p>
+                ) : activities.length === 0 ? (
+                  <div className="agenda-empty-state">
+                    <FaCalendarAlt />
+                    <strong>No activities planned for Day {selectedDay}</strong>
+                    <span>Add your first activity to start building the day.</span>
+                  </div>
+                ) : (
+                  <div className="activity-timeline">
+                    {activities
+                      .slice()
+                      .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                      .map((activity) => (
+                        <div className="activity-row" key={activity.activityId}>
+                          <div className="activity-time">{activity.startTime}</div>
+                          <div className="activity-marker">
+                            <span>{getActivityIcon(activity.activityType)}</span>
+                          </div>
+                          <div className="activity-content">
+                            <div className="activity-content-top">
+                              <div>
+                                <span className="activity-type">
+                                  {formatActivityType(activity.activityType)}
+                                </span>
+                                <strong>{activity.description}</strong>
+                              </div>
+                              <div className="activity-actions">
+                                <button type="button" onClick={() => handleEditActivity(activity)}>
+                                  <FaEdit />
+                                </button>
+                                <button type="button" onClick={() => void handleDeleteActivity(activity.activityId)}>
+                                  <FaTrash />
+                                </button>
+                              </div>
+                            </div>
+                            {activity.notes && <p>{activity.notes}</p>}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </>
             )}
           </article>
 
