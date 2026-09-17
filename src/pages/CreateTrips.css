@@ -136,9 +136,7 @@
   font-size: 0.9rem;
 }
 
-
 .trip-form-card textarea:focus {
- 
   font-size: 16px;
   font-weight: 600;
   color: #333;
@@ -163,23 +161,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
- 
-}
-
-.destination-card-head button,
-.section-subhead button {
-  border: none;
-  background: transparent;
-  color: #3b3dbd;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-
+  margin: 18px 0 12px;
 }
 
 .two-column,
@@ -306,39 +288,42 @@
   color: #aaa;
   font-size: 0.85rem;
 }
- .trip-summary-card {
-    position: static;
-  }
+.trip-summary-card {
+  position: static;
+}
 
-  .steps-track {
-    flex-wrap: wrap;
-  }
+.steps-track {
+  flex-wrap: wrap;
+}
 
+.add-stop-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
 
-  .add-stop-icon {
-    width: 42px;
-    height: 42px;
-    border: none;
-    border-radius: 50%;
-    background: #3b3dbd;
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  
-  .form-label {
-    font-size: 25px;
-    font-weight: 800;
-    color: #1f2937;
-    display: block;
-    margin-bottom: 25px;
-  }
+  margin: 0;
+  padding: 0;
 
-  .destination-delete {
+  border: none;
+  border-radius: 50%;
+  background: #3b3dbd;
+  color: white;
+
+  font-size: 12px;
+}
+
+.form-label {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #555;
+}
+
+.destination-delete {
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
@@ -367,8 +352,7 @@
   border-radius: 10px;
   overflow: hidden;
 
-  box-shadow: 0 10px 25px
-    rgba(30, 30, 70, 0.15);
+  box-shadow: 0 10px 25px rgba(30, 30, 70, 0.15);
 }
 
 .location-suggestion-item {
@@ -412,6 +396,3 @@
     flex-wrap: wrap;
   }
 }
-
- 
-
